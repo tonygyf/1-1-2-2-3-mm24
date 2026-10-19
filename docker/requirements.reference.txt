@@ -1,0 +1,28 @@
+# Runtime lock candidate for Python 3.7, not an independently verified image.
+numpy==1.21.6
+Pillow==9.5.0
+scipy==1.7.3
+scikit-learn==1.0.2
+scikit-image==0.19.3
+opencv-contrib-python==4.8.1.78
+imgaug==0.4.0
+Polygon3==3.0.9.1
+pyclipper==1.3.0.post5
+lanms-proper==1.0.2
+lmdb==1.4.1
+matplotlib==3.5.3
+numba==0.56.4
+rapidfuzz==1.9.1
+six==1.16.0
+terminaltables==3.1.10
+fvcore==0.1.5.post20221221
+shapely==1.8.5.post1
+# Upstream tests.txt asks 0.23.0 (Python >=3.8), incompatible with README's
+# Python3.7. This runtime alternative is a recorded discrepancy, not exact lock.
+python-Levenshtein==0.12.2
+albumentations==1.3.1
+opencv-python-headless==4.8.1.78
+opencv-python==4.8.1.78
+yapf==0.40.1
+pycocotools==2.0.7
+importlib-metadata==6.7.0

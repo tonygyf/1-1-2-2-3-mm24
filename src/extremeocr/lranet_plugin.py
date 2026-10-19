@@ -9,12 +9,14 @@ from .adapter import SaturationAdapter
 @DETECTORS.register_module()
 class HighlightLRANetPP(LRANet_PP):
     def __init__(self, adapter_channels=256, adapter_levels=4,
-                 adapter_bottleneck=32, **kwargs):
+                 adapter_bottleneck=32, conditioning="saturation",
+                 active_levels=None, **kwargs):
         super().__init__(**kwargs)
         self.highlight_adapter = SaturationAdapter(adapter_channels, adapter_levels,
-                                                   adapter_bottleneck)
-        self.register_buffer("rgb_mean", torch.tensor([123.675, 116.28, 103.53]).view(1, 3, 1, 1))
-        self.register_buffer("rgb_std", torch.tensor([58.395, 57.12, 57.375]).view(1, 3, 1, 1))
+                                                   adapter_bottleneck, conditioning,
+                                                   active_levels)
+        self.register_buffer("rgb_mean", torch.tensor([123.675, 116.28, 103.53]).view(1, 3, 1, 1), persistent=False)
+        self.register_buffer("rgb_std", torch.tensor([58.395, 57.12, 57.375]).view(1, 3, 1, 1), persistent=False)
 
     def extract_feat(self, img):
         features = super().extract_feat(img)

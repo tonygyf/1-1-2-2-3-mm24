@@ -1,0 +1,11 @@
+{
+  "source": "https://arxiv.org/html/2511.05818v1",
+  "selected_profile": null,
+  "checkpoint_profile_mapping": "pending official checkpoint metadata/author release verification",
+  "profiles": {
+    "standard_external": {"paper_tables": ["X", "XIV"], "totaltext_det_hmean": 0.881, "totaltext_e2e_none_hmean": 0.822, "external_data": ["Synth150K", "MLT17"]},
+    "expanded_external": {"paper_tables": ["XII starred", "XIV"], "totaltext_det_hmean": 0.908, "totaltext_e2e_none_hmean": 0.846, "external_data": ["Synth150K", "MLT17", "IC13", "IC15", "TextOCR"]}
+  },
+  "absolute_tolerance_fraction": 0.005,
+  "protocol": "Original full-clean test and threshold sweep, lexicon-free. Do not compare a fixed-threshold robustness run to a swept paper target."
+}

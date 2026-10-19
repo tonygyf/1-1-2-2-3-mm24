@@ -1,5 +1,7 @@
 # ExtremeOCR：最小研究项目简报
 
+> 2026-10-19续轮更新：本文件保留立项背景；最新实现和协议以 `docs/STATUS.md`、`docs/BASELINE_ALIGNMENT.md`、`docs/EXPERIMENTS.md` 为准。E003容量对照现已实现；独立dev/资源限制等已补。仍没有真实OCR分数或服务器复现。
+
 2026-10-19；目标为 CCF-B；算力为用户提供的 4 × RTX 6000D、约 83GB/卡。
 
 **建议主线：局部强光/高光饱和下的端到端 text spotting。** 从现成 checkpoint 测掉点，再比较普通微调和针对性方法。雨雪、模糊保留为诊断对照；先不同时展开多个课题。

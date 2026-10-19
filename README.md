@@ -4,14 +4,15 @@
 
 当前主线：**局部高光/饱和下的端到端 text spotting**。主 baseline 为 LRANet++（2025 arXiv，官方仓库现标注 TPAMI），第二研究入口为 SemiETS（CVPR 2025）。训练资源：用户提供的 4 × RTX 6000D，单卡约 83GB；不以轻量化作为选题限制。
 
-当前完成的是可运行的实验基础设施和待检验模块。尚未下载正式数据及权重，尚无真实 OCR 指标，也未完成服务器复现。
+当前已完成官方560文件字节对齐、模块化FPN对照、独立dev评测和有资源限制的实验入口。尚未下载正式数据及权重，尚无真实OCR指标；Docker镜像和服务器GPU环境待验证。
 
 ## 开始
 
 ```powershell
 python -m pip install -e .
-python scripts/smoke.py
-python -m unittest discover -s tests -v
+python -m pip install --target work/qa_deps --no-deps -r scripts/requirements.qa.txt
+python scripts/fetch_baseline.py
+python scripts/verify_local.py
 python scripts/preflight.py
 ```
 
@@ -23,7 +24,7 @@ python scripts/preflight.py
 extremeocr build --images data/raw/totaltext --annotations data/raw/totaltext/totaltext_test.json --output data/derived/totaltext_test --config configs/screen.json
 ```
 
-服务器运行方法见 [实验手册](docs/EXPERIMENTS.md)。选题证据、纠错和论文阅读顺序见 [项目简报](outputs/PROJECT_BRIEF.md)。
+先读 [本轮研究方案](docs/RESEARCH_PLAN.md)、[baseline对齐审计](docs/BASELINE_ALIGNMENT.md)、[容器限制](docs/CONTAINER.md)，然后按 [实验SOP](docs/EXPERIMENTS.md) 执行。每个模块合格线在 `configs/quality_gates.json`，各run用 `scripts/inspect_run.py` 检查实际跑通的链路。选题来源见 [项目简报](outputs/PROJECT_BRIEF.md)。
 
 ## 目录约定
 

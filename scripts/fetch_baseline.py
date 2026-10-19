@@ -14,7 +14,11 @@ def main():
     baseline = lock["lranet_pp"]
     dest = ROOT / "work/upstream/LRANet-PP"
     if (dest / ".source.json").exists():
-        print("Baseline snapshot already present: " + str(dest))
+        from audit_baseline import audit
+        report = audit()
+        if not report["passed"]:
+            raise SystemExit("Existing snapshot changed; inspect before continuing: " + repr(report))
+        print("Verified existing official snapshot: " + str(dest))
         return
     if dest.exists() and any(dest.iterdir()):
         raise SystemExit("Unregistered snapshot exists; inspect it before replacing: " + str(dest))

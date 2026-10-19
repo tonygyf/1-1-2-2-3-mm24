@@ -1,0 +1,10 @@
+**
+!docker/
+!docker/**
+!work/
+!work/upstream/
+!work/upstream/LRANet-PP/
+!work/upstream/LRANet-PP/**
+**/__pycache__/
+**/build/
+**/*.egg-info/

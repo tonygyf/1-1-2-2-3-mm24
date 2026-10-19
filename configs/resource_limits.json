@@ -1,0 +1,14 @@
+{
+  "container_memory_gib": 128,
+  "watchdog_memory_gib": 112,
+  "cpus": 24,
+  "pids_limit": 512,
+  "shm_gib": 16,
+  "poll_seconds": 2,
+  "termination_grace_seconds": 30,
+  "memory_consecutive_polls": 3,
+  "max_hours": 48,
+  "stall_minutes": 30,
+  "max_data_errors": 100,
+  "note": "Conservative configurable starting values, not inferred server RAM. Docker memory-swap equals memory (no swap). Watchdog measures container cgroup aggregate, including cache."
+}

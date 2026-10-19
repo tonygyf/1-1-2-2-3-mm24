@@ -47,8 +47,7 @@ def build_suite(input_root, annotations, output_root, config_path):
             if rel.is_absolute() or ".." in rel.parts:
                 raise ValueError("file_name must be a relative dataset path: " + str(rel))
             source = (input_root / rel).resolve()
-            if not source.is_relative_to(input_root):
-                raise ValueError("Image path is outside input root: " + str(rel))
+            source.relative_to(input_root)
             dest_rel = rel.with_suffix(".png")
             dest = target_root / "images" / dest_rel
             dest.parent.mkdir(parents=True, exist_ok=True)

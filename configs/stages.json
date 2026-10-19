@@ -1,0 +1,5 @@
+{
+  "probe": {"max_iters": 30, "lr_steps": [15], "checkpoint_interval": 30, "log_interval": 1},
+  "pilot": {"max_iters": 500, "lr_steps": [250], "checkpoint_interval": 500, "log_interval": 20},
+  "full": {"max_iters": 10000, "lr_steps": [5000], "checkpoint_interval": 500, "log_interval": 20}
+}

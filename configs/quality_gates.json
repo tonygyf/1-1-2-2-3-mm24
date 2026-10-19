@@ -1,0 +1,12 @@
+{
+  "G00_source": {"requires": [], "pass": "All 560 files match pinned official archive; basis and evaluator hashes included."},
+  "G01_data": {"requires": ["G00_source"], "pass": "No source hash/scene-group train-dev overlap; labels inherited; image paths/sizes valid; official test order unchanged."},
+  "G02_environment": {"requires": ["G00_source"], "pass": "Server DCNv2 and grid sampler forward/backward finite; exact runtime/image digest and extension hashes recorded; all 4 GPU capabilities checked."},
+  "G03_module": {"requires": ["G02_environment"], "pass": "Equal capacity controls; full load lifecycle FPN max abs error <=1e-6; only adapter keys may be missing at official initialization; trained checkpoint reload exact."},
+  "G04_reproduction": {"requires": ["G01_data", "G02_environment"], "pass": "Official checkpoint, basis, full test and sweep protocol matched. Select the matching paper_targets.json profile only after checkpoint provenance is verified. Both Hmeans within 0.5 percentage point of that cited profile; otherwise investigate."},
+  "G05_probe": {"requires": ["G01_data", "G03_module"], "pass": "30 finite updates, 1-GPU then 4-GPU; no data-error resampling storm; nonzero adapter gradients/updates; save-reload; watchdog kill/reap fault test passes in container."},
+  "G06_pilot": {"requires": ["G04_reproduction", "G05_probe"], "pass": "500 updates each, same train/dev manifests, checkpoint initialization, optimizer, batch, LR, augmentations and seed; evaluate last checkpoint only on dev; no final-test selection."},
+  "G07_full": {"requires": ["G06_pilot"], "pass": "Frozen candidate beats ordinary finetuning and capacity control; pre-registered dev target +1.0 pp mean glare e2e, clean loss <=0.5 pp, worst-severity loss <=0.5 pp; 3 seeds (42,43,44). Targets are research decisions, not measured outcomes."},
+  "G08_final": {"requires": ["G07_full"], "pass": "Freeze configurations then run official full test/real heldout once per registered run. Report all seeds, raw metrics, mean/std, failure counts and source hashes; second dataset and matcher validated first."},
+  "G09_claim": {"requires": ["G08_final"], "pass": "Ablations distinguish conditioning/location/capacity; real-data and second-architecture evidence before generality claims; unsupported hypotheses explicitly withdrawn."}
+}
