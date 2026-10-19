@@ -1,0 +1,8 @@
+{
+  "name": "screen-v1",
+  "seed": 42,
+  "kinds": ["exposure", "glare", "bloom", "motion_blur", "rain", "snow"],
+  "severities": [1, 2, 3],
+  "include_clean": true,
+  "purpose": "Diagnosis only. Calibrate against real images before claiming a benchmark."
+}

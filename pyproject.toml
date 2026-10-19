@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "extremeocr"
+version = "0.1.0"
+description = "Reproducible adverse-condition scene text spotting experiments"
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.21,<2", "Pillow>=9.5"]
+
+[project.optional-dependencies]
+model = ["torch>=1.8"]
+
+[project.scripts]
+extremeocr = "extremeocr.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

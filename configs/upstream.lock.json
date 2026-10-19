@@ -1,0 +1,33 @@
+{
+  "checked_at": "2026-10-19",
+  "lranet_pp": {
+    "repo": "ychensu/LRANet-PP",
+    "commit": "ca1c9e3f60df646b66f399b711ee6f83a3254a14",
+    "archive_sha256": "4ed54c12b8475bf02ed9ee5da31cdc53bc58e96796e40f8e5ce3d02f0c9bfdd0",
+    "path": "work/upstream/LRANet-PP",
+    "paper": "https://arxiv.org/abs/2511.05818",
+    "status": "source_downloaded_not_model_executed"
+  },
+  "semiets": {
+    "repo": "DrLuo/SemiETS",
+    "commit": "fe1bf7e57e4236b5ca1464c3be44eea86eb2ef57",
+    "paper": "https://arxiv.org/abs/2504.09966",
+    "status": "repository_and_instructions_inspected_not_downloaded"
+  },
+  "skills": [
+    {
+      "repo": "mattpocock/skills",
+      "commit": "49dd158d1076134a641b33efb035946536778336",
+      "paths": ["skills/productivity/grill-me", "skills/productivity/grilling"],
+      "destination": ".agents/skills",
+      "license_sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"
+    },
+    {
+      "repo": "uditgoenka/autoresearch",
+      "commit": "050e30dc4ba0974b03f2873111b9901ec3211390",
+      "paths": [".claude/skills/autoresearch"],
+      "destination": ".agents/skills",
+      "license_sha256": "36fe186f404fa529a4c290a5c671e0dd07162be0c3270c02e1cdc831e97bf127"
+    }
+  ]
+}
