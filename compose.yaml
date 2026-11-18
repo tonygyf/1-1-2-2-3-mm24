@@ -1,0 +1,28 @@
+name: extremeocr
+services:
+  research:
+    image: extremeocr:lranet-modern
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.modern
+      args:
+        LOCAL_UID: ${LOCAL_UID:-1001}
+        LOCAL_GID: ${LOCAL_GID:-1001}
+    init: true
+    restart: "no"
+    working_dir: /workspace
+    command: ["sleep", "infinity"]
+    volumes:
+      - .:/workspace
+    gpus: all
+    environment:
+      CUDA_VISIBLE_DEVICES: ${EXTREMEOCR_GPUS:-0}
+      EXTREMEOCR_IMAGE_ID: ${EXTREMEOCR_IMAGE_ID:-unrecorded-compose-image}
+      EXTREMEOCR_LIMITS_JSON: '{"container_memory_gib":48,"watchdog_memory_gib":40,"cpus":12,"pids_limit":1024,"shm_gib":8,"max_hours":2}'
+    mem_limit: 48g
+    memswap_limit: 48g
+    cpus: 12
+    pids_limit: 1024
+    shm_size: 8g
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]

@@ -1,0 +1,41 @@
+{
+  "source_sha256": "520c3285d46fc77cf43bfe8f7f2854254e691e5c28265fd911939f101e8d624e",
+  "missing_constant_buffers": [
+    "bbox_head.tps_decode.P_hat",
+    "bbox_head.tps_decode.P_hat_grid",
+    "bbox_head.tps_decode.P_hat_inv",
+    "bbox_head.tps_decode.inv_delta_C",
+    "recog_head.tps_decode.P_hat",
+    "recog_head.tps_decode.P_hat_grid",
+    "recog_head.tps_decode.P_hat_inv",
+    "recog_head.tps_decode.inv_delta_C"
+  ],
+  "unused_checkpoint_keys": [
+    "bbox_head.decoder.P_hat",
+    "bbox_head.decoder.P_hat_grid",
+    "bbox_head.decoder.P_hat_inv",
+    "bbox_head.decoder.inv_delta_C",
+    "recog_head.tower.0.bn.bias",
+    "recog_head.tower.0.bn.num_batches_tracked",
+    "recog_head.tower.0.bn.running_mean",
+    "recog_head.tower.0.bn.running_var",
+    "recog_head.tower.0.bn.weight",
+    "recog_head.tower.0.conv.weight",
+    "recog_head.tower.1.bn.bias",
+    "recog_head.tower.1.bn.num_batches_tracked",
+    "recog_head.tower.1.bn.running_mean",
+    "recog_head.tower.1.bn.running_var",
+    "recog_head.tower.1.bn.weight",
+    "recog_head.tower.1.conv.weight",
+    "recog_head.tps_decoder.P_hat",
+    "recog_head.tps_decoder.P_hat_grid",
+    "recog_head.tps_decoder.P_hat_inv",
+    "recog_head.tps_decoder.inv_delta_C",
+    "recog_head.tpsalign2.tps_decoder.P_hat",
+    "recog_head.tpsalign2.tps_decoder.P_hat_grid",
+    "recog_head.tpsalign2.tps_decoder.P_hat_inv",
+    "recog_head.tpsalign2.tps_decoder.inv_delta_C"
+  ],
+  "semantics": "Matches upstream non-strict loading: preserve every matching trained tensor; initialize missing TPS constants from current official code; omit keys unused by current code. No trained tensor is remapped or initialized.",
+  "training_profile": "unverified"
+}

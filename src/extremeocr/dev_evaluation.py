@@ -23,7 +23,7 @@ def gt_lines(annotations):
         if not isinstance(parts, list) or len(parts) != 1:
             raise ValueError("Dev GT requires exactly one polygon per instance")
         flat = parts[0]
-        if len(flat) < 8 or len(flat) % 2 or not all(math.isfinite(x) for x in flat):
+        if len(flat) < 6 or len(flat) % 2 or not all(math.isfinite(x) for x in flat):
             raise ValueError("Invalid dev GT polygon")
         points = np.asarray(flat, dtype=float).reshape(-1, 2).astype(int)
         # Match upstream's Cartesian LinearRing.is_ccw == False convention,

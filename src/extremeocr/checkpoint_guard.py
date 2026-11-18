@@ -26,8 +26,10 @@ def install():
         if not hasattr(target, "recog_head") or not hasattr(target, "bbox_head"):
             return original(module, state_dict, strict=strict, logger=logger)
         allowed = meta["checkpoint_origin"] == "official" and meta["module"] != "none"
-        clean, report = checked_state(target.state_dict(), state_dict, allowed,
-                                      meta["checkpoint_origin"] == "official")
+        expected = target.state_dict()
+        constants = {name: value for name, value in target.named_buffers() if name not in expected}
+        clean, report = checked_state(expected, state_dict, allowed,
+                                      meta["checkpoint_origin"] == "official", constants)
         write_json(run / ("checkpoint_keys_rank" + os.environ.get("RANK", "0") + ".json"), report)
         if not report["passed"]:
             raise RuntimeError("Checkpoint architecture mismatch: " + repr(report))

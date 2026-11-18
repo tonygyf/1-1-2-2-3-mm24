@@ -68,15 +68,16 @@ def main():
     offset = torch.zeros(1, 18, 8, 8, device="cuda")
     mask = torch.ones(1, 9, 8, 8, device="cuda")
     weight = torch.randn(2, 2, 3, 3, device="cuda")
-    dcn_output = modulated_deform_conv2d(x, offset, mask, weight, padding=1)
+    dcn_output = modulated_deform_conv2d(x, offset, mask, weight, None, 1, 1)
     dcn_output.sum().backward()
     if not torch.isfinite(dcn_output).all().item() or not torch.isfinite(x.grad).all().item():
         raise ValueError("Nonfinite DCNv2 forward/backward")
     from mmocr.models.textend2end.utils.grid_sample_batch.grid_sample_batch import grid_sample_batch
-    sampler_input = torch.randn(1, 2, 8, 8, device="cuda", requires_grad=True)
-    grid = torch.zeros(1, 2, 3, 2, device="cuda", requires_grad=True)
-    sampled = grid_sample_batch(sampler_input, grid, torch.zeros(1, device="cuda"), 0, 0, False)
-    raw_sampled = grid_sample_batch(sampler_input, grid.detach(), torch.zeros(1, device="cuda"), 0, 0, None)
+    sampler_input = torch.randn(2, 2, 8, 8, device="cuda", requires_grad=True)
+    grid = (torch.rand(3, 3, 5, 2, device="cuda") * 2.4 - 1.2).requires_grad_(True)
+    batch_indices = torch.tensor([1., 0., 1.], device="cuda")
+    sampled = grid_sample_batch(sampler_input, grid, batch_indices, 0, 0, False)
+    raw_sampled = grid_sample_batch(sampler_input, grid.detach(), batch_indices, 0, 0, None)
     if not torch.equal(raw_sampled, sampled):
         raise ValueError("Upstream align_corners=None differs from False; investigate environment")
     sampled.sum().backward()
@@ -84,7 +85,7 @@ def main():
         raise ValueError("Custom sampler backward is nonfinite")
     reference_input = sampler_input.detach().clone().requires_grad_(True)
     reference_grid = grid.detach().clone().requires_grad_(True)
-    expected = torch.nn.functional.grid_sample(reference_input, reference_grid, align_corners=False)
+    expected = torch.nn.functional.grid_sample(reference_input[batch_indices.long()], reference_grid, align_corners=False)
     expected.sum().backward()
     sampler_error = max((sampled - expected).abs().max().item(),
                         (sampler_input.grad - reference_input.grad).abs().max().item(),

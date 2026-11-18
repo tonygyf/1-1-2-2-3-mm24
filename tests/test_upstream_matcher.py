@@ -37,6 +37,9 @@ class UpstreamMatcherTests(unittest.TestCase):
         if variant == "short_numeric":
             doc["annotations"] += [{"id": 3, "image_id": 11, "transcription": "12",
                                     "segmentation": [[200, 0, 220, 0, 220, 40, 200, 40]]}]
+        if variant == "triangle_ignore":
+            doc["annotations"].append({"id": 4, "image_id": 11, "transcription": "#", "iscrowd": 1,
+                                       "segmentation": [[200, 0, 240, 0, 200, 40]]})
         previous = Path.cwd()
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / "dev"
@@ -74,3 +77,8 @@ class UpstreamMatcherTests(unittest.TestCase):
         result = self.evaluate("short_numeric")
         self.assertEqual(result["E2E_RESULTS"]["hmean"], 1)
         self.assertLess(result["DETECTION_ONLY_RESULTS"]["hmean"], 1)
+
+    def test_ignored_triangle_from_real_totaltext_is_accepted(self):
+        result = self.evaluate("triangle_ignore")
+        self.assertEqual(result["E2E_RESULTS"]["hmean"], 1)
+        self.assertEqual(result["DETECTION_ONLY_RESULTS"]["hmean"], 1)

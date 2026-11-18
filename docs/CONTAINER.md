@@ -1,61 +1,42 @@
-# 容器与进程资源约束
+# Docker 与资源约束
 
-## 当前可用状态
+更新：2026-10-22，Asia/Shanghai。Docker daemon 已可用；本轮安装、下载、编译和实验均在新建的本项目容器或 Docker build 的 RUN 步骤中完成，没有向宿主机安装依赖，也未修改其他项目容器。
 
-本机Docker客户端存在，但daemon未运行；本轮没有构建镜像或运行容器。`docker/Dockerfile.reference` 是待服务器验证的历史环境候选，不能称为可直接支持RTX6000D的已验证镜像。实际GPU架构、驱动和主机RAM未知；83GB/卡不意味着CPU内存也是这个数。
+## 当前验证
 
-该候选锁定作者README的Python3.7、torch1.8.1/cu111、mmcv-full1.3.9、mmdet2.15.1，并从本地已校验快照构建。运行时vendor指向镜像里的 `/opt/lranet`，因此自定义grid sampler的相对包导入能找到同目录编译产物；不要只用一个未编译的源码挂载覆盖它。
+- 实测硬件：4 × NVIDIA RTX 6000D，compute capability 12.0，单卡 89,173,131,264 bytes（约83.1 GiB）。GPU 2 有其他任务，本轮使用 0/1/3。
+- 基础镜像：`nvcr.io/nvidia/pytorch@sha256:b5541f591b87e68d3883040bfdbf89707bd6f80e2e38b95411c9ff3e1cb63eeb`；Python3.12.3、torch2.10.0a0 NVIDIA25.12、CUDA13.1。
+- MMCV1.7.2 源码编译 sm_120，MMDetection2.15.1；保留旧 API，不能换成 MMCV2/MMDet3。
+- 实测 DCNv2/custom sampler CUDA 前后向、原 FPN 与零初始化 adapter 恒等、真实图片推理、单卡/双卡30步、optimizer/EMA/iteration 恢复通过。四卡同步尚未验证。
+- `docker/Dockerfile.reference` 保留为历史环境参考，CUDA11.1 不支持本卡的 sm_120，不用于当前实验。
 
-支持依赖不是作者完整lockfile：上游requirements未完整固定版本，其中tests要求的Levenshtein0.23.0不兼容README的Python3.7。本参考候选记录为0.12.2的运行时实现；rapidfuzz固定1.9.1以保留旧代码使用的string_metric，yapf固定0.40.1。服务器构建后必须保存pip freeze并跑matcher fixture。若有差异，先修环境，不把它隐瞒成完全相同的软件栈。
-
-## 服务器准备
-
-在具备NVIDIA Container Toolkit的Linux服务器操作。本轮不执行这些命令。
-
-```bash
-python scripts/fetch_baseline.py
-docker build --progress=plain -f docker/Dockerfile.reference -t extremeocr:lranet-reference .
-docker image inspect extremeocr:lranet-reference > work/reference-image-inspect.json
-python scripts/docker_run.py --execute -- python scripts/preflight.py
-```
-
-构建只复制第三方源码与docker依赖说明，不复制数据、checkpoint或实验输出。构建默认 `MAX_JOBS=4`；源码中CUDA扩展保留原样。参考CUDA arch列表仅7.0/7.5/8.0/8.6，不能通过随意填写未来架构来让旧CUDA获得支持。
-
-若实际GPU不支持该工具链，保留 reference image/tag 作为协议证据，在 `work/` 建单独移植源码/补丁和新镜像tag。先做到kernel前后向、原模型输出一致性、同一官方checkpoint的clean精度，再允许研究模块训练。当前没有预先声称某个现代torch/mmcv组合可用。
-
-## 默认资源与可调整配置
-
-`configs/resource_limits.json` 是默认值；复制它到 `work/server_limits.json` 按服务器实际资源修改，用 `docker_run.py --limits work/server_limits.json` 传入。整个有效配置都会传到watchdog，不仅仅是RAM阈值。
-
-| 资源 | 默认值 | 实际行为 |
-| --- | --- | --- |
-| CPU RAM | 128 GiB | Docker cgroup硬上限；不是GPU显存上限 |
-| 提前终止阈值 | 112 GiB | 每2秒查容器聚合内存，连续3次超限终止本次session |
-| swap | 额外0 | `--memory-swap`等于`--memory` |
-| CPU | 24核配额 | 避免占满共享服务器 |
-| PID | 512 | 限制DataLoader/DDP进程膨胀 |
-| shared memory | 16 GiB | 独立shm；不用host IPC，计入容器总内存预算 |
-| 单实验最长 | 48小时 | 超时停止，不无限重启 |
-| 无日志进展 | 30分钟 | 判断潜在卡死；首轮编译不在训练watchdog中 |
-| 坏数据重采样 | 累计100条`data error` | 停止并要求修复数据链，防上游无限换样本 |
-| 退出宽限 | 30秒 | 先SIGTERM，仍存活再SIGKILL本次session进程组 |
-
-watchdog测的是容器cgroup内存，包含page cache等，不等同于Python对象RSS；更换阈值要据实际峰值和数据加载方式调整，不能为了绕过OOM直接去掉限制。硬上限可能先触发kernel OOM，故不保证每次都来得及优雅退出；Docker和watchdog记录用于复盘。
-
-默认启动含 `--init --rm --restart=no --cap-drop=ALL --security-opt=no-new-privileges --network=none`。实验所需图像/权重/源码必须预先准备好。宿主项目目录挂载到 `/workspace`；无host PID、host IPC或privileged权限；不连接外部服务。
+## 重建与启动
 
 ```bash
-python scripts/docker_run.py --limits work/server_limits.json -- python scripts/preflight.py
+docker build --memory 48g --memory-swap 48g --shm-size 8g \
+  --build-arg LOCAL_UID=$(id -u) --build-arg LOCAL_GID=$(id -g) \
+  -f docker/Dockerfile.modern -t extremeocr:lranet-modern .
+export EXTREMEOCR_IMAGE_ID=$(docker image inspect --format '{{.Id}}' extremeocr:lranet-modern)
+docker compose up -d --no-build
+docker compose exec research bash
 ```
 
-不加 `--execute` 只打印命令。Linux实际运行用同一命令加 `--execute`。在容器内运行lranet_run仍须显式给 `--execute` 才启动模型：宿主层开关启动容器，内部开关启动实验。
+进入 shell 后运行项目 Python 命令。没有 buildx 的主机可直接用上述 legacy build；不要为了下载/编译而在宿主机安装工具。镜像构建由固定 archive + `docker/patches/` 重放源码移植，`prepare_modern_port.py` 核验原包及补丁 SHA。构建上下文排除数据、权重和运行产物，只允许配置、准备脚本、补丁及历史镜像使用的官方源码快照；容器运行通过 `/workspace` 挂载项目。
 
-## 自动清理的边界
+镜像内官方模型代码为 `/opt/vendor/lranet`，MMDetection 为 `/opt/vendor/mmdetection`，MMCV 为安装的 CUDA wheel。`EXTREMEOCR_SOURCE_VARIANT=modern` 使源码审计检查显式的 `configs/modern_port.json`；没有登记的改动仍会被拒绝。原始快照在 `work/upstream/LRANet-PP`，`fetch_baseline.py` 始终对它执行 official 字节检查。原 evaluator 文件未改算法。
 
-watchdog使用 `start_new_session=True`，只给本次session进程组发信号，完成、失败或中断后都清理遗留活进程。`--init` 回收被托管的孤儿进程和zombie；真正zombie已结束执行，不能靠kill让它消失，需要父进程wait或init接管。
+兼容变化包括 NumPy 已移除类型名、rapidfuzz 等价 API、版本声明、现代 C++ 头/API、sampler 构建包路径、CUDA stream 的 torch.device 参数。OpenCV contrib 需最后安装，提供作者训练标注生成所需 TPS 接口。checkpoint release mismatch 由单独固定策略处理，见 `checkpoints/README.md`。
 
-不会扫描整台机器按名字kill python，也不自动杀别人的GPU任务。Docker没有通用的每进程VRAM硬限额；本方案CPU RAM硬限制不能保证GPU不OOM。CUDA OOM/训练异常应以非零退出结束该组，其余worker由guard清理。未来只有在明确GPU进程归属映射后才增加显存watchdog，不能用全局nvidia-smi列表误杀。
+## 运行限制
 
-容器故障演练属于G05，尚未在本机执行：包括内存阈值、walltime、SIGTERM、主进程退出留worker、坏数据风暴和正常退出。通过前不写“僵尸清理已实测”。
+Compose 默认 CPU RAM 48 GiB、无额外 swap、12 核、1024 PID、8 GiB独立 shm，drop capabilities，非 root 用户，`--init` 回收子进程。训练/eval 由原有 resource_guard 管理，提前 RAM 阈值40 GiB、最长2小时。最初开发容器的 watchdog 自动按48 GiB硬上限将默认阈值钳到42 GiB；不要把默认配置中的128 GiB误作实际硬上限。
 
-先在服务器运行 `python -m unittest discover -s tests -p test_resource_guard.py -v` 做不分配大内存的进程测试，再在受限容器中验证实际cgroup与init回收。unit测试用模拟memory计数触发清理，不能替代真实Docker硬上限测试。
+Compose 的 preparation 容器有网络以便下载。进入正式离线实验可使用 `docker run --network none` 和相同资源/挂载/环境（宿主仅调用 Docker CLI）；项目 `scripts/docker_run.py` 保留为可测试的命令生成器，但本轮不在宿主运行 Python。
+
+GPU 默认 `CUDA_VISIBLE_DEVICES=0`。多卡时显式选择空闲 GPU，并令 `lranet_run.py --gpus N` 与可见卡数一致；GPU 显存无通用硬配额。不要按全局进程名字 kill；watchdog 只清理其拥有的进程组。
+
+坏样本错误风暴的实际训练故障已触发 watchdog 并结束本组；单元测试另覆盖超时、SIGTERM、遗留 worker 等。真实超内存/全部故障注入演练尚未全部完成，不能写完整 G05 通过。torch/NCCL 的退出警告也不等同于已经实测所有清理场景。
+
+## 来源证据
+
+每次 run 固定 project/src/scripts/configs 快照，记录数据/初始化权重/配置哈希、seed、训练预算、pip freeze、扩展二进制哈希和资源轨迹。最终镜像 ID、构建日志及镜像内环境验证在初始化报告中汇总；首次开发容器的分数另标其直接调用环境，不能伪造镜像 ID。

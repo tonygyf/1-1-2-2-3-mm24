@@ -1,6 +1,11 @@
 **
 !docker/
 !docker/**
+!configs/
+!configs/upstream.lock.json
+!configs/modern_port.json
+!scripts/
+!scripts/prepare_modern_port.py
 !work/
 !work/upstream/
 !work/upstream/LRANet-PP/

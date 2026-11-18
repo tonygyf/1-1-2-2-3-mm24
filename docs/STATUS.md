@@ -1,26 +1,31 @@
 # 状态与下一步
 
-更新：2026-10-19，Asia/Shanghai。本轮用户明确：不跑服务器训练，先做baseline对齐、FPN adapter对照与完整SOP。
+更新：2026-10-22，Asia/Shanghai。用户本轮已确认：完成容器、正式资源、baseline 推理和短程诊断；不进入完整方法训练。原2026-10-19“无服务器结果”状态已被本轮实测替代。
 
-## 已查证与已实现
+## 已查证事实与实测
 
-- GitHub插件核对官方main与锁定commit一致；560个上游文件与官方固定archive逐字节一致，包括LRA基底。`scripts/audit_baseline.py`可重复核验。
-- 核实原评测阈值扫描、实际resize、300图GT顺序、word-spotting care差异、识别置信乘入检测score；详情见 `BASELINE_ALIGNMENT.md`。
-- 五种module开关、按层消融、等容量/零初始化、梯度与更新健康hook、checkpoint嵌入架构/源配置绑定、key/shape/非有限值/EMA备份审计。
-- 原图/场景分组划分train/dev、独立dev GT/matcher、关闭上游默认eval的推理桥、每run独立scratch及数据/权重/配置哈希。
-- pre/post recognition score探针、polygon饱和率和GT矩形crop导出、固定识别器输出评分接口。
-- Docker参考候选、RAM/CPU/PID/shm上限、无额外swap、watchdog本组清理、超时/无日志/坏样本风暴退出策略。
-- G00–G09合格线，30/500/10000步阶段、三seed与最终测试规则、实验复盘模板。
-- 本地验收报告：`outputs/local_verification.json`；单一入口 `python scripts/verify_local.py`。最终测试数以报告中的unittest输出为准，不把软件fixture分数放入论文表。
+- 新建本项目 Docker 环境，未修改其他项目容器，所有安装/下载/编译/实验在容器内。实测4×RTX6000D，sm_120，单卡约83.1GiB；GPU2有其他任务，实验用0/1/3。
+- 原 LRANet++ 固定快照560文件字节审计保留；现代移植位于独立目录。Dockerfile.modern 固定 NGC digest、依赖源码 archive、补丁 SHA，Compose 提供资源约束。最终镜像验收详见初始化报告。
+- 作者 Total-Text：1255 train / 300 test，ZIP CRC、解码、尺寸与哈希检查通过。seed42、按源图/字节重复分组为 train1067/dev188；近重复/场景人工审阅仍待完成。
+- 官方 checkpoint 已下载并固定 SHA。它与发布代码有旧键/冗余层差异；仅对这一份原始 SHA 的明确策略保留全部550匹配 tensor，补8个TPS常量、略去24个不使用的键，模拟上游非严格加载；未知权重仍严格拒绝。原始权重保留。
+- CUDA 生命周期通过：FPN恒等最大误差0，DCNv2前后向有限，自定义sampler与原生多batch/越界采样参考的前后向最大误差1.19e-7。
+- 300张官方clean：上游原阈值扫描实测 detection Hmean90.1068%、无词典e2e84.8005%。checkpoint无训练元数据，标准/扩展profile未核清，G04不判通过。
+- dev188张、固定阈值0.3：clean86.0739/85.1941，glare-s1 85.9343/84.6890，s2 81.8825/78.1925，s3 62.5363/59.3017（前者det，后者e2e，单位%）。包含pre/post recognition confidence候选探针。未构造test腐蚀集，未用test选阈值/模块。
+- 真实单卡baseline30步、双卡adapter DDP30步、15→30步optimizer/EMA恢复通过。adapter24个tensor有非零梯度并发生更新；这只是链路健康证据。
+- 新增/修复：Docker资源与环境入口、断点续传与校验、严格权重转换、合法三角形忽略GT、现代CUDA stream参数、DDP local-rank传参、传统MMCV非持久buffer恢复。39项软件测试和fixture smoke通过。
+- 坏样本错误风暴实际触发watchdog终止；全部故障注入未做完。失败run和复盘保留，不重写为成功。
 
-## 未验证或尚待实现
+## 研究假设
 
-- Docker daemon未运行，参考镜像未构建；实际服务器GPU架构、驱动、CPU RAM、DCNv2/grid sampler kernel、完整模型反向、DDP、训练保存恢复均待服务器门槛。
-- 正式图像/官方checkpoint尚未下载，checkpoint对应的论文训练profile待核对。论文目标已摘录，但本地baseline精度未复现，模块有效性未验证。
-- 官方Total-Text微调权重可能见过后划分的clean dev源图；如需严格初始训练隔离，所有研究组用同一pretrain初始化并增加train-only clean对照。
-- 便携dev序列化已通过官方matcher软件fixture；服务器同预测对照原POSIX序列化的一致性待验。
-- GT曲线校正/同模型GT-grid oracle、OpenOCR自动推理、通用增强与曝光校正自动分支、第二数据集/架构、真实heldout适配和配对bootstrap仍待接。SOP已规定这些实验，未冒充已完成代码。
+局部饱和可能造成检测与识别采样/置信度失配；饱和条件adapter能否超过普通微调、等容量残差和位置对照仍未知。当前退化掉点与候选过滤统计不足以证明机制，也不能用两种care集合不同的Hmean相减归因。
+
+## 未验证项
+
+- G04论文profile/精度对齐；原权重实际训练配置/数据仍待作者证据。
+- 四卡同步30步、完整资源故障注入、精确RNG/DataLoader续训轨迹；当前只验证单卡/双卡与状态恢复。
+- 训练/开发场景近重复审阅、人工可读性分层、严格无训练来源暴露的pretrain初始化。
+- 所有500/10000步有效性实验、三seed、GT-crop独立识别、真实heldout、第二数据集/架构和统计显著性。
 
 ## 下一步
 
-服务器先按 `CONTAINER.md` 实测环境和资源故障演练，再做E000官方复现。之后依次执行独立dev诊断、单卡/四卡30步、五组500步pilot、合格方法10000步三seed，冻结后做最终测试。遇到门槛失败先修该链路；本轮停在本地软件验收。
+先解决profile证据与四卡/故障门槛，保持固定阈值和独立dev。随后才按SOP做普通微调、容量匹配、饱和/全局/翻转等预算pilot；不达预登记目标则记录负结果并停止大训练。最新证据索引、镜像ID和运行路径见 `outputs/INITIALIZATION_REPORT.md`，逐run检查用 `scripts/inspect_run.py`。

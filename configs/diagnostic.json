@@ -1,0 +1,14 @@
+{
+  "name": "initialization-glare-v1",
+  "seed": 42,
+  "kinds": [
+    "glare"
+  ],
+  "severities": [
+    1,
+    2,
+    3
+  ],
+  "include_clean": true,
+  "purpose": "Initial dev and training pipeline diagnostics only; no test calibration."
+}

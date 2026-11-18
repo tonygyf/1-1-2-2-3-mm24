@@ -3,7 +3,7 @@ from collections import OrderedDict
 import torch
 
 
-def checked_state(expected, actual, allow_new_adapter=False, official_origin=False):
+def checked_state(expected, actual, allow_new_adapter=False, official_origin=False, nonpersistent_buffers=None):
     missing = sorted(set(expected) - set(actual))
     allowed_missing = lambda key: (allow_new_adapter and key.startswith("highlight_adapter.")) or key.endswith("num_batches_tracked")
     invalid_missing = [key for key in missing if not allowed_missing(key)]
@@ -13,7 +13,12 @@ def checked_state(expected, actual, allow_new_adapter=False, official_origin=Fal
     extras = set(actual) - set(expected)
     ema_backups = sorted(key for key in extras if key in mapping
                          and tuple(actual[key].shape) == tuple(expected[mapping[key]].shape))
-    unexpected = sorted(extras - set(ema_backups))
+    # Legacy MMCV saves nonpersistent buffers too; accept only exact runtime constants.
+    constants = nonpersistent_buffers or {}
+    verified_constants = sorted(key for key in extras if key in constants
+                                and tuple(actual[key].shape) == tuple(constants[key].shape)
+                                and torch.equal(actual[key].detach().cpu(), constants[key].detach().cpu()))
+    unexpected = sorted(extras - set(ema_backups) - set(verified_constants))
     mismatch = sorted(key for key in set(actual) & set(expected)
                       if tuple(actual[key].shape) != tuple(expected[key].shape))
     nonfinite = sorted(key for key in set(actual) & set(expected)
@@ -23,9 +28,11 @@ def checked_state(expected, actual, allow_new_adapter=False, official_origin=Fal
     report = {"missing": missing, "unexpected": unexpected, "shape_mismatch": mismatch,
               "nonfinite_weights": nonfinite,
               "verified_ema_backups_ignored": ema_backups,
+              "verified_nonpersistent_buffers_ignored": verified_constants,
               "weight_policy": "ordinary parameter keys exactly as saved, matching upstream test loading",
               "passed": not invalid_missing and not unexpected and not mismatch and not nonfinite}
-    clean = OrderedDict((key, value) for key, value in actual.items() if key not in ema_backups)
+    ignored = set(ema_backups) | set(verified_constants)
+    clean = OrderedDict((key, value) for key, value in actual.items() if key not in ignored)
     if hasattr(actual, "_metadata"):
         clean._metadata = actual._metadata
     return clean, report

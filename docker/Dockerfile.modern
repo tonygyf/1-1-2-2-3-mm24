@@ -1,0 +1,24 @@
+FROM nvcr.io/nvidia/pytorch@sha256:b5541f591b87e68d3883040bfdbf89707bd6f80e2e38b95411c9ff3e1cb63eeb
+ENV DEBIAN_FRONTEND=noninteractive MAX_JOBS=4 FORCE_CUDA=1 TORCH_CUDA_ARCH_LIST=12.0
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential git patch ripgrep libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
+COPY docker/requirements.modern.txt /opt/bootstrap/requirements.txt
+RUN python -m pip install --no-cache-dir -r /opt/bootstrap/requirements.txt
+# Install contrib last: the author's target generation uses OpenCV TPS.
+RUN python -m pip install --no-cache-dir --no-deps opencv-contrib-python-headless==4.10.0.84
+COPY configs/upstream.lock.json configs/modern_port.json /opt/bootstrap/configs/
+COPY docker/patches/ /opt/bootstrap/patches/
+COPY scripts/prepare_modern_port.py /opt/bootstrap/prepare_modern_port.py
+RUN python /opt/bootstrap/prepare_modern_port.py --destination /opt/vendor --config-dir /opt/bootstrap/configs --patch-dir /opt/bootstrap/patches
+WORKDIR /opt/vendor/mmcv
+RUN MMCV_WITH_OPS=1 python setup.py bdist_wheel --dist-dir /opt/wheels && python -m pip install --no-deps /opt/wheels/*.whl && rm -rf build
+WORKDIR /opt/vendor/lranet/mmocr/models/textend2end/utils/grid_sample_batch
+RUN python setup.py build_ext --build-lib /opt/vendor/lranet && rm -rf build
+RUN python -m pip freeze > /opt/runtime-pip-freeze.txt
+ARG LOCAL_UID=1001
+ARG LOCAL_GID=1001
+RUN groupadd --gid ${LOCAL_GID} extremeocr && useradd --uid ${LOCAL_UID} --gid ${LOCAL_GID} --create-home extremeocr
+ENV EXTREMEOCR_CONTAINER=1 EXTREMEOCR_SOURCE_VARIANT=modern EXTREMEOCR_VENDOR=/opt/vendor/lranet PYTHONUNBUFFERED=1 OMP_NUM_THREADS=2 NVIDIA_TF32_OVERRIDE=0
+ENV PYTHONPATH=/workspace/src:/opt/vendor/mmdetection:/opt/vendor/lranet:/opt/vendor/lranet/mmocr/core/evaluation/evaluation_e2e
+USER extremeocr
+WORKDIR /workspace
+CMD ["python", "scripts/preflight.py"]

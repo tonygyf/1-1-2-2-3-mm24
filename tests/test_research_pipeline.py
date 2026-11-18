@@ -52,6 +52,16 @@ class ResearchPipelineTests(unittest.TestCase):
         actual = {"backbone.weight": torch.full((2, 3), float("nan"))}
         self.assertFalse(checked_state(expected, actual, True, True)[1]["passed"])
 
+    def test_legacy_nonpersistent_buffers_must_equal_runtime_constants(self):
+        expected = {"weight": torch.ones(1)}
+        constants = {"rgb_mean": torch.tensor([123.675])}
+        actual = dict(expected, rgb_mean=constants["rgb_mean"].clone())
+        clean, report = checked_state(expected, actual, nonpersistent_buffers=constants)
+        self.assertTrue(report["passed"])
+        self.assertEqual(set(clean), set(expected))
+        actual["rgb_mean"].add_(1)
+        self.assertFalse(checked_state(expected, actual, nonpersistent_buffers=constants)[1]["passed"])
+
     def test_embedded_checkpoint_architecture_matches_sidecar(self):
         run = {"checkpoint_origin": "experiment", "module": "saturation", "levels": [0, 1, 2, 3],
                "checkpoint_contract": {"prepared_config": {"sha256": "expected"}}}

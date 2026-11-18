@@ -18,16 +18,30 @@
     {
       "repo": "mattpocock/skills",
       "commit": "49dd158d1076134a641b33efb035946536778336",
-      "paths": ["skills/productivity/grill-me", "skills/productivity/grilling"],
+      "paths": [
+        "skills/productivity/grill-me",
+        "skills/productivity/grilling"
+      ],
       "destination": ".agents/skills",
       "license_sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5"
     },
     {
       "repo": "uditgoenka/autoresearch",
       "commit": "050e30dc4ba0974b03f2873111b9901ec3211390",
-      "paths": [".claude/skills/autoresearch"],
+      "paths": [
+        ".claude/skills/autoresearch"
+      ],
       "destination": ".agents/skills",
       "license_sha256": "36fe186f404fa529a4c290a5c671e0dd07162be0c3270c02e1cdc831e97bf127"
+    },
+    {
+      "repo": "DietrichGebert/ponytail",
+      "commit": "09c434ab73ca43761c5d8b0c5d341926c2fba710",
+      "paths": [
+        "skills/ponytail"
+      ],
+      "destination": ".agents/skills",
+      "license_sha256": "fb1bc6909ac3ef82d5c22106e32ef682b0cff66788fa915fb9b53b15c9d2f3ab"
     }
   ]
 }

@@ -1,0 +1,33 @@
+{
+  "base_image": "nvcr.io/nvidia/pytorch@sha256:b5541f591b87e68d3883040bfdbf89707bd6f80e2e38b95411c9ff3e1cb63eeb",
+  "cuda_arch": "12.0",
+  "lranet_upstream_commit": "ca1c9e3f60df646b66f399b711ee6f83a3254a14",
+  "lranet_patched_files": {
+    "mmocr/__init__.py": "f162f2ecb14981b2f7b2df1dc58323e45a8452cbb1871d6bf560ec86a8ecd3ff",
+    "mmocr/core/evaluation/ocr_metric.py": "5c1e8fd8a170adc3f0b78249b80b334c850e98872057cadf38fcc511845cd5b2",
+    "mmocr/datasets/pipelines/box_utils.py": "6e8acf4162ec561b59bbaf5ac37efb86c1455f11812b6a8f6ece7cb9ca7e2538",
+    "mmocr/datasets/pipelines/textdet_targets/fcenet_targets.py": "e810026a9cb2abc9691d42f612830429053c4f29dd630cd87a323c46330676fe",
+    "mmocr/datasets/pipelines/textdet_targets/lranet_targets.py": "53b5c72564a2442729a764ccc5c55f0db8a91bad16ede3a13455d62021f2765d",
+    "mmocr/models/textdet/postprocess/wrapper.py": "ac3948248fdd1098b9fa7c8043d9e54230cb476af478c62db091e55df409b9aa",
+    "mmocr/models/textend2end/utils/grid_sample_batch/setup.py": "ea749a17935da31b16fb350016b7d5de09927762b6f7facfa023109c744be8e4",
+    "mmocr/models/textend2end/utils/grid_sample_batch/src/grid_sampler.cpp": "e1e917b7531167a0bbf037315330725d584bcc5ea676c63980441c13c1f7531e"
+  },
+  "dependencies": {
+    "mmcv": {
+      "repo": "open-mmlab/mmcv",
+      "tag": "v1.7.2",
+      "archive_sha256": "c619455b43e0b5cb3c120342e2b296d0d427cfd4a4a2ef34b34e50fb9ce6a1f8"
+    },
+    "mmdetection": {
+      "repo": "open-mmlab/mmdetection",
+      "tag": "v2.15.1",
+      "archive_sha256": "0114b0b88f1538d9c5bfdc9b2ee6729dbfc5c7a08a42e64a97a51a52c9e325d6"
+    }
+  },
+  "status": "compatibility_under_diagnosis; not accuracy reproduction",
+  "patches": {
+    "mmdetection-modern.patch": "861a9e67cec9c4fb8ef45c74a640e6c110fe4e929a109942a7d887df85598726",
+    "mmcv-modern.patch": "2cf6d6f1e63f72638c35b530379ef9650c32d451c961606b084865253d156547",
+    "lranet-modern.patch": "b08667b1376ebd847c7d86e9bba26de78efb8e1c0dd55a8460a50acb511552d9"
+  }
+}

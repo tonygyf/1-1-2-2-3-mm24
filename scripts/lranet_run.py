@@ -38,12 +38,15 @@ def parser():
     p.add_argument("--gpus", type=int, default=4)
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--score-threshold", type=float, default=0.3)
+    p.add_argument("--resume", action="store_true", help="Restore optimizer and iteration from --checkpoint (train only)")
     p.add_argument("--execute", action="store_true")
     return p
 
 
 def validate_args(a):
     a.split = a.split or ("train" if a.mode == "train" else "test")
+    if a.resume and a.mode != "train":
+        raise ValueError("--resume is restricted to training")
     if a.adapter:
         if a.module not in ("none", "saturation"):
             raise ValueError("--adapter conflicts with --module")
@@ -123,6 +126,8 @@ def prepare(a):
     contract = json.loads(contract_path.read_text(encoding="utf-8")) if contract_path.exists() else None
     if contract and (contract["module"] != a.module or contract["levels"] != a.levels):
         raise ValueError("Checkpoint module/level contract differs from requested architecture")
+    if a.resume and contract is None:
+        raise ValueError("Resume requires a project checkpoint_contract.json")
     stage = json.loads((ROOT / "configs/stages.json").read_text(encoding="utf-8"))[a.stage]
     basis = vendor / "orthanchors/syntext_14.npz"
     imports = ["extremeocr.checkpoint_guard"]
@@ -158,14 +163,14 @@ def prepare(a):
                   "lr_config = " + repr(dict(policy="step", step=stage["lr_steps"], by_epoch=False)),
                   "checkpoint_config = " + repr(dict(interval=stage["checkpoint_interval"], by_epoch=False)),
                   "log_config = dict(interval=" + str(stage["log_interval"]) + ")",
-                  "custom_hooks = [dict(type='ExpMomentumEMAHook', momentum=0.0002, priority=49), dict(type='FiniteLossHook', priority=10), dict(type='AdapterHealthHook', priority=60, interval=" + str(1 if a.stage == "probe" else 20) + ")]",
-                  "load_from = " + repr(ckpt.as_posix()), "seed = " + str(a.seed)]
+                  "custom_hooks = [dict(type='ExpMomentumEMAHook', momentum=0.0002, priority=49" + (", resume_from=" + repr(ckpt.as_posix()) if a.resume else "") + "), dict(type='FiniteLossHook', priority=10), dict(type='AdapterHealthHook', priority=60, interval=" + str(1 if a.stage == "probe" else 20) + ")]",
+                  ("resume_from = " if a.resume else "load_from = ") + repr(ckpt.as_posix()), "seed = " + str(a.seed)]
         command = [sys.executable]
         if a.gpus > 1:
-            command += ["-m", "torch.distributed.launch", "--nproc_per_node=" + str(a.gpus),
+            command += ["-m", "torch.distributed.launch", "--use-env", "--nproc_per_node=" + str(a.gpus),
                         "--master_port=" + os.environ.get("PORT", "29500")]
         command += [str(vendor / "tools/train.py"), str(run / "config.py"),
-                    "--work-dir", str(run / "training"), "--load-from", str(ckpt),
+                    "--work-dir", str(run / "training"), "--resume-from" if a.resume else "--load-from", str(ckpt),
                     "--seed", str(a.seed), "--no-validate"]
         if a.gpus > 1:
             command += ["--launcher", "pytorch"]

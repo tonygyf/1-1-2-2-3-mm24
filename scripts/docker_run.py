@@ -21,16 +21,15 @@ def docker_command(root, image, limits, command, gpus="all"):
             "--cap-drop=ALL", "--security-opt=no-new-privileges", "--network=none",
             "--mount", "type=bind,source=" + str(root) + ",target=/workspace",
             "--workdir", "/workspace", "--env", "EXTREMEOCR_CONTAINER=1",
-            "--env", "EXTREMEOCR_VENDOR=/opt/lranet",
             "--env", "EXTREMEOCR_WATCHDOG_GIB=" + str(limits["watchdog_memory_gib"]),
             "--env", "EXTREMEOCR_LIMITS_JSON=" + json.dumps(limits, separators=(",", ":")),
             "--env", "PYTHONUNBUFFERED=1", "--env", "OMP_NUM_THREADS=1",
-            "--env", "PYTHONPATH=/workspace/src:/opt/lranet", image] + list(command)
+            image] + list(command)
 
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--image", default="extremeocr:lranet-reference")
+    p.add_argument("--image", default="extremeocr:lranet-modern")
     p.add_argument("--limits", default=str(ROOT / "configs/resource_limits.json"))
     p.add_argument("--gpus", default="all")
     p.add_argument("--execute", action="store_true")

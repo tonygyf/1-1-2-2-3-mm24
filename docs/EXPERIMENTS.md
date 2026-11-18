@@ -1,6 +1,6 @@
 # 实验 SOP：先确认链路，再确认方法
 
-更新：2026-10-19。当前阶段为**代码与本地软件验收**，不代表 baseline 精度复现。先读 [研究方案](RESEARCH_PLAN.md)、[上游审计](BASELINE_ALIGNMENT.md) 和 [容器说明](CONTAINER.md)。所有命令从项目根目录执行。
+更新：2026-10-22。已完成正式资源和 GPU 初始化诊断；实测分数见 `outputs/INITIALIZATION_REPORT.md`。尚不代表论文 profile 精度复现或方法有效。先读 [研究方案](RESEARCH_PLAN.md)、[上游审计](BASELINE_ALIGNMENT.md) 和 [容器说明](CONTAINER.md)。所有实验命令从容器 `/workspace` 执行。先在宿主仅调用 `docker compose exec research bash` 进入容器；下文 Python/extremeocr 命令均在该 shell 内运行。镜像构建/启动按 `CONTAINER.md`；无需在宿主安装依赖。
 
 ## 0. 每次运行必须留下什么
 
@@ -17,8 +17,7 @@
 ## 1. 本地只验软件
 
 ```bash
-python -m pip install -e .
-python -m pip install --target work/qa_deps --no-deps -r scripts/requirements.qa.txt
+# 现代镜像已安装运行/QA依赖，项目由 PYTHONPATH 加载。
 python scripts/fetch_baseline.py
 python scripts/verify_local.py
 ```
@@ -30,23 +29,23 @@ QA 依赖只进入忽略目录，避免替换训练环境的旧依赖。普通�
 按 CONTAINER.md 建参考镜像并记录实际硬件。旧 CUDA 未必支持新显卡；先跑 preflight，再显式跑 kernel/lifecycle gate，失败时先做独立移植镜像，不能跳到训练。
 
 ```bash
-python scripts/docker_run.py --execute -- python scripts/preflight.py
-python scripts/docker_run.py --execute -- python scripts/server_gate.py --checkpoint checkpoints/upstream/lranet_pp/totaltext.pth --output work/runs/server-lifecycle.json
+python scripts/preflight.py
+python scripts/server_gate.py --checkpoint checkpoints/upstream/lranet_pp/totaltext_runtime.pth --output work/runs/server-lifecycle.json
 ```
 
 `server_gate.py` 会构建真实模型、加载完整官方权重、比较 adapter 零初始化前后的 FPN 输出，并执行 DCNv2 和自定义 sampler 的 CUDA 前向/反向；它不替代真实图片推理、DDP 或全模型反向。运行时可再用 `resource_guard.py --run-dir work/runs/gate -- ...` 包住 gate；Docker 硬内存上限始终有效。
 
 ## 3. E000：只复现官方协议
 
-先按 `data/README.md`、`checkpoints/README.md` 放入官方准备的完整 Total-Text JSON、图像及权重。不要随意重排 JSON。对应上游 GitHub commit 的全部文件与基底需保持一致。
+先按 `data/README.md`、`checkpoints/README.md` 使用容器下载器准备完整 Total-Text JSON、图像及权重，并通过固定策略生成运行权重。不要随意重排 JSON。对应上游 GitHub commit 的全部文件与基底需保持一致。
 
 ```bash
-python scripts/docker_run.py --execute -- python scripts/lranet_run.py eval --images data/raw/totaltext --annotations data/raw/totaltext/totaltext_test.json --official-annotations data/raw/totaltext/totaltext_test.json --checkpoint checkpoints/upstream/lranet_pp/totaltext.pth --protocol official-sweep --run E000-official --execute
+python scripts/lranet_run.py eval --images data/raw/totaltext --annotations data/raw/totaltext/totaltext_test.json --official-annotations data/raw/totaltext/totaltext_test.json --checkpoint checkpoints/upstream/lranet_pp/totaltext_runtime.pth --protocol official-sweep --run E000-official --execute
 ```
 
 这保留原模型和原 evaluator 扫阈值；本项目只加资源隔离、绝对资源路径及严格权重审计。实际 resize 为外层 `(1800,1000)` 的 keep-ratio 限制，不能按内层 `(1280,800)` 解释。
 
-论文目标见 `configs/paper_targets.json`，存在两种外部训练数据版本；下载权重后先核对它属于哪个版本。标准版论文目标为检测 88.1%、无词典 e2e 82.2%，扩展训练版为 90.8%/84.6%。均为**论文引用值**，本项目尚无实测值；对应 profile 未核清前不判“复现通过”。两项绝对差目标不超过 0.5 个百分点，超差先查权重、图像顺序、resize、GT 和运行环境。固定阈值表不与这个扫阈值上限混用。
+论文目标见 `configs/paper_targets.json`，存在两种外部训练数据版本；原 release 缺训练元数据，profile 仍未核清；不能根据相近分数反推版本。标准版论文目标为检测 88.1%、无词典 e2e 82.2%，扩展训练版为 90.8%/84.6%。均为**论文引用值**，本项目实测见初始化报告，但尚无 profile 对齐判定；对应 profile 未核清前不判“复现通过”。两项绝对差目标不超过 0.5 个百分点，超差先查权重、图像顺序、resize、GT 和运行环境。固定阈值表不与这个扫阈值上限混用。
 
 ## 4. 在原图级划分 train/dev
 
@@ -61,8 +60,8 @@ python scripts/split_training.py --images data/raw/totaltext/training --annotati
 ## 5. 分别构建 train 与 dev 退化
 
 ```bash
-extremeocr build --images data/raw/totaltext/training --annotations data/derived/totaltext_split/totaltext_train.json --output data/derived/totaltext_train --config configs/screen.json
-extremeocr build --images data/raw/totaltext/training --annotations data/derived/totaltext_split/totaltext_dev.json --output data/derived/totaltext_dev --config configs/screen.json
+python -m extremeocr.cli build --images data/raw/totaltext/training --annotations data/derived/totaltext_split/totaltext_train.json --output data/derived/totaltext_train --config configs/screen.json
+python -m extremeocr.cli build --images data/raw/totaltext/training --annotations data/derived/totaltext_split/totaltext_dev.json --output data/derived/totaltext_dev --config configs/screen.json
 python scripts/mix_training.py --suite data/derived/totaltext_train --annotation-name totaltext_train.json --variants clean glare/s1 glare/s2 glare/s3 --output data/derived/totaltext_train/totaltext_mixed.json
 ```
 
@@ -75,7 +74,7 @@ clean 加三档 glare 的混合样本比为 1:1:1:1，即 clean 占 25%，不是
 零样本 dev 评测同一个初始化，保存 pre/post recognition confidence：
 
 ```bash
-python scripts/docker_run.py --execute -- python scripts/lranet_run.py eval --split dev --images data/derived/totaltext_dev/glare/s2/images --annotations data/derived/totaltext_dev/glare/s2/totaltext_dev.json --checkpoint checkpoints/upstream/lranet_pp/totaltext.pth --score-probe --run E001-dev-glare-s2 --execute
+python scripts/lranet_run.py eval --split dev --images data/derived/totaltext_dev/glare/s2/images --annotations data/derived/totaltext_dev/glare/s2/totaltext_dev.json --checkpoint checkpoints/upstream/lranet_pp/totaltext_runtime.pth --score-probe --run E001-dev-glare-s2 --execute
 ```
 
 dev 使用 `predict_dev.py` **显式关闭上游默认的评测开关**，然后用独立 GT zip 和顺序映射调用原 matcher；不触碰官方 GT 包。项目 dev 的序列化按原整数坐标、0.1 预过滤、三位分数舍入、阈值及 winding 规则处理。Windows 下原官方序列化存在路径分隔符假设，项目 dev 使用可移植序列化；服务器仍须在同一组预测上对照原序列化，确认数值一致。
@@ -92,8 +91,8 @@ python scripts/score_crops.py --instances work/runs/probe-crops-glare-s2/instanc
 ## 7. 30 步 probe：单卡再四卡
 
 ```bash
-python scripts/docker_run.py --gpus all --execute -- python scripts/lranet_run.py train --images data/derived/totaltext_train --annotations data/derived/totaltext_train/totaltext_mixed.json --checkpoint checkpoints/upstream/lranet_pp/totaltext.pth --module saturation --stage probe --gpus 1 --run P001-adapter-1gpu --execute
-python scripts/docker_run.py --execute -- python scripts/lranet_run.py train --images data/derived/totaltext_train --annotations data/derived/totaltext_train/totaltext_mixed.json --checkpoint checkpoints/upstream/lranet_pp/totaltext.pth --module saturation --stage probe --gpus 4 --run P002-adapter-4gpu --execute
+python scripts/docker_run.py --gpus all --execute -- python scripts/lranet_run.py train --images data/derived/totaltext_train --annotations data/derived/totaltext_train/totaltext_mixed.json --checkpoint checkpoints/upstream/lranet_pp/totaltext_runtime.pth --module saturation --stage probe --gpus 1 --run P001-adapter-1gpu --execute
+python scripts/lranet_run.py train --images data/derived/totaltext_train --annotations data/derived/totaltext_train/totaltext_mixed.json --checkpoint checkpoints/upstream/lranet_pp/totaltext_runtime.pth --module saturation --stage probe --gpus 4 --run P002-adapter-4gpu --execute
 ```
 
 `--gpus` 在 docker_run 是可见设备选择，在 lranet_run 是 DDP worker 数。训练默认 probe，只有显式 `--stage full` 才是大训练。检查各 rank 梯度有限、非零更新、loss、吞吐、内存，随后加载保存的 `training/iter_30.pth` 做 dev 推理。30 步不要求 Hmean 提升。
@@ -117,7 +116,7 @@ python scripts/docker_run.py --execute -- python scripts/lranet_run.py train --i
 评测已训练权重必须使用相同 module/levels，并保留权重同目录的 `checkpoint_contract.json`：
 
 ```bash
-python scripts/docker_run.py --execute -- python scripts/lranet_run.py eval --split dev --images data/derived/totaltext_dev/clean/images --annotations data/derived/totaltext_dev/clean/totaltext_dev.json --checkpoint work/runs/E004-pilot/training/iter_500.pth --module saturation --run E004-pilot-dev-clean --execute
+python scripts/lranet_run.py eval --split dev --images data/derived/totaltext_dev/clean/images --annotations data/derived/totaltext_dev/clean/totaltext_dev.json --checkpoint work/runs/E004-pilot/training/iter_500.pth --module saturation --run E004-pilot-dev-clean --execute
 python scripts/inspect_run.py --run-dir work/runs/E004-pilot-dev-clean
 python scripts/collect_metrics.py --run-dir work/runs/E004-pilot-dev-clean --output work/runs/dev_metrics.csv
 ```
@@ -139,3 +138,12 @@ pilot 通过后冻结 configs、数据、初始化、阈值、模块和选择规
 在容器内专门的演练 run 验证：超内存、超时、SIGTERM、父进程提前退出遗留 worker、坏样本重采样。watchdog超限只杀自己创建的session进程组；Docker `--init` 回收孤儿僵尸。真正的 zombie 不能靠SIGKILL消除，需要父进程wait/init回收。
 
 每次失败填 [复盘模板](RUN_REVIEW_TEMPLATE.md)：触发条件、退出码、最后loss、资源峰值、哪一级失败、修复内容、重跑范围。软件测试、环境通过、baseline复现、方法有效和论文创新分别记状态。首项目的SOP也应保留失败路径。
+
+
+## 2026-10-22 初始化补充
+
+`configs/diagnostic.json` 仅生成 clean + glare三档，已在 dev 做固定阈值0.3诊断。正式 test 未生成退化套件，也未据测试选择阈值/模块。训练原图根目录使用 `data/raw/totaltext/training`；测试 JSON 中含 `test/`，根目录使用 `data/raw/totaltext`。
+
+`probe` 现在在15/30步保存，以支持真实断点恢复门槛。恢复命令沿用原 train 参数，将 `--checkpoint` 指向前次 `training/iter_15.pth` 并加 `--resume`。保留旁边 checkpoint_contract.json；脚本恢复 optimizer/iteration 并让原 EMA hook 在注册备份后恢复 EMA。传统 MMCV 会连非持久 buffer 也保存，项目只接受与运行时常量逐值相等的额外 buffer。未知键/错误 shape/非有限值仍拒绝。
+
+本轮只完成30步初始化诊断，不做500/10000步方法有效性判断。单卡与双卡都通过；GPU2有其他任务，四卡同步门槛仍待空闲资源。断点恢复跨2卡到1卡只用于恢复链路检查，不是逐步轨迹一致性对照。

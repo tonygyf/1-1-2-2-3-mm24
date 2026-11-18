@@ -60,7 +60,8 @@ def main():
            "checkpoint": meta["checkpoint"], "annotations": meta["annotations"],
            "annotation_sha256": meta["dataset"]["annotation"]["sha256"],
            "checkpoint_sha256": meta["checkpoint_asset"]["sha256"],
-           "threshold": meta["score_threshold"], "protocol": meta["evaluation_protocol"],
+           "threshold": meta["score_threshold"] if meta["protocol"] == "fixed" else "upstream-sweep",
+           "protocol": meta["evaluation_protocol"],
            "det_hmean": metrics["det-hmean"], "e2e_hmean": metrics["e2e-hmean"]}
     dest = Path(a.output)
     dest.parent.mkdir(parents=True, exist_ok=True)

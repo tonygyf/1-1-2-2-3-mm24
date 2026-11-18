@@ -1,17 +1,10 @@
-# 权重放置
+# 初始化权重
 
-目前没有下载任何正式 OCR 权重。
+2026-10-22 已在 Docker 内下载 [LRANet++ 官方 Total-Text 权重](https://github.com/ychensu/LRANet-PP#trained-model)。
 
-后续按需创建：
+- 原始文件：`checkpoints/upstream/lranet_pp/totaltext.pth`，作者名 `totaltext_final.pth`；SHA256 `520c3285d46fc77cf43bfe8f7f2854254e691e5c28265fd911939f101e8d624e`。
+- 运行文件：`totaltext_runtime.pth`。`scripts/prepare_checkpoint.py` 保留 550 个匹配 tensor，不修改其数值；补入当前代码按定义生成的 8 个 TPS 常量，略去当前代码不用的 24 个旧键，匹配官方非严格加载行为。原文件不改。策略只覆盖固定原始 SHA，来源与运行文件 SHA 在 `.source.json` 中。
+- 原始 release 只有 state_dict，没有训练元数据；标准版/扩展训练版 profile 未核清。现有实测分数不能反推训练数据并据此宣布复现通过。
+- 所有研究对照须从同一初始化开始并记录 dev 源图暴露。Synth/MLT pretrain 尚未下载；严格训练来源隔离仍需它或其他明确的初始化。
 
-```text
-checkpoints/
-  upstream/lranet_pp/totaltext.pth
-  upstream/lranet_pp/pretrain.pth
-  experiments/E004-seed42/best.pth
-```
-
-- 从 [LRANet++ 官方 Trained Model](https://github.com/ychensu/LRANet-PP#trained-model) 获取 Total-Text 已训练权重，优先直接做零样本诊断；不从大规模预训练开始烧时间。
-- 普通微调、模块、容量对照从同一权重起步；预训练数据保持一致。
-- 每个权重旁放 `SOURCE.md`：原始 URL、SHA256、训练数据、版本、用途、许可/使用限制。下载页能打开不代表文件已可用。
-- 最终论文用到的权重才从 `work/runs` 晋升到这里；临时 checkpoint 留在对应 run 中。
+容器内运行 `python scripts/download_assets.py --only checkpoint`，然后 `python scripts/prepare_checkpoint.py`。运行权重不自动覆盖。实际权重、训练临时 checkpoint 不进 Git；后者在各 `work/runs/<run>/training/`。原模型/数据使用条款适用。

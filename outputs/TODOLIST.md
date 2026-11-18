@@ -1,6 +1,6 @@
 # 后续待办
 
-本轮完成代码对齐和本地验收，**没有服务器实验结果**。实际状态见 `docs/STATUS.md`，执行细节见 `docs/EXPERIMENTS.md`。
+2026-10-22 已完成容器初始化、正式资源和真实GPU诊断，**尚无方法有效性实验**。实际状态见 `docs/STATUS.md`，执行细节见 `docs/EXPERIMENTS.md`。
 
 ## 代码阶段已完成
 
@@ -13,16 +13,20 @@
 
 ## 服务器第一阶段（前置门槛）
 
-- [ ] 实测GPU capability/驱动/CPU RAM，构建参考环境或单独移植镜像；记录差异。
-- [ ] CUDA扩展前后向、完整加载恒等、普通/adapter checkpoint保存恢复、单卡和4卡反向。
+- [x] 实测4卡GPU capability，单独现代CUDA移植；固定镜像/源码/补丁，记录差异。
+- [x] CUDA扩展前后向、FPN恒等、单卡/双卡30步、adapter状态保存恢复。
+- [ ] 四卡同步反向和完整checkpoint/RNG/DataLoader轨迹一致性。
 - [ ] RAM/超时/SIGTERM/孤儿worker/坏数据风暴故障演练。
-- [ ] 下载官方图像/标注/checkpoint，登记来源、许可和哈希，核对论文profile。
-- [ ] E000官方clean复现；便携dev与原POSIX序列化的同预测对照。
+- [x] 下载官方图像/标注/checkpoint，登记来源、条款状态和哈希。
+- [ ] 核对checkpoint论文训练profile；当前不判G04通过。
+- [x] E000官方clean实际推理及扫描：det90.11/e2e84.80，profile未核清。
+- [ ] 便携dev与原POSIX序列化同预测对照。
 
 ## 研究迭代
 
 - [ ] 记录初始化的训练数据暴露；冻结分组、阈值、退化和预算。
-- [ ] 零样本dev、score探针、饱和率与可读性分层。
+- [x] 零样本dev clean+三档glare、固定阈值0.3、score探针。
+- [ ] 饱和率/可读性分层与场景/近重复人工审阅。
 - [ ] 五组500步pilot；主要三组10000步×3 seeds；条件/层级消融。
 - [ ] clean-only、通用增强、曝光校正、识别oracle/GT crop独立识别器。
 - [ ] 真实heldout、第二数据集和第二架构的独立协议适配。

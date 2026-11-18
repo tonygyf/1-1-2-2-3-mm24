@@ -1,0 +1,538 @@
+{
+  "scope": "User-confirmed initialization and short diagnostics only",
+  "updated_at_utc": "2026-10-22T14:09:26.867817+00:00",
+  "timezone": "Asia/Shanghai",
+  "container": "extremeocr-research-1",
+  "runtime_image_id": "sha256:0d8a927f4d52978f41572f37a13dd6485a0761edd072978705f08f061ef99cde",
+  "base_image": "nvcr.io/nvidia/pytorch@sha256:b5541f591b87e68d3883040bfdbf89707bd6f80e2e38b95411c9ff3e1cb63eeb",
+  "software": {
+    "status": "passed",
+    "tests": 39,
+    "pip_check": "passed",
+    "fixture_smoke": "passed"
+  },
+  "source": {
+    "pristine_upstream": {
+      "commit": "ca1c9e3f60df646b66f399b711ee6f83a3254a14",
+      "files_checked": 560,
+      "changed_or_missing": [],
+      "passed": true,
+      "source_variant": "official",
+      "official_bytes_unchanged": true,
+      "port_manifest": null
+    },
+    "runtime_port": {
+      "commit": "ca1c9e3f60df646b66f399b711ee6f83a3254a14",
+      "files_checked": 560,
+      "changed_or_missing": [],
+      "passed": true,
+      "source_variant": "modern",
+      "official_bytes_unchanged": false,
+      "port_manifest": {
+        "path": "/workspace/configs/modern_port.json",
+        "sha256": "c131686fbb70f22d1ddbdb9619717188d7fed16ac2a01170566fb673cfc3be5d"
+      }
+    }
+  },
+  "hardware": {
+    "python": "3.12.3 (main, Nov  6 2025, 13:44:16) [GCC 13.3.0]",
+    "platform": "Linux-6.17.0-40-generic-x86_64-with-glibc2.39",
+    "inside_docker": true,
+    "source_variant": "modern",
+    "vendor": "/opt/vendor/lranet",
+    "cgroup": {
+      "memory.max": "51539607552",
+      "memory.swap.max": "0",
+      "cpu.max": "1200000 100000",
+      "pids.max": "1024"
+    },
+    "distribution_versions": {
+      "torch": "2.10.0a0+b4e4ee81d3.nv25.12",
+      "torchvision": "0.25.0a0+ca221243",
+      "mmcv-full": "1.7.2",
+      "mmdet": "2.15.1",
+      "mmocr": null,
+      "numpy": "1.26.4",
+      "rapidfuzz": "3.9.7",
+      "Levenshtein": "0.23.0",
+      "opencv-contrib-python-headless": "4.10.0.84",
+      "albumentations": "1.3.1",
+      "fvcore": "0.1.5.post20221221",
+      "lanms-nova": "1.0.3"
+    },
+    "numpy": true,
+    "PIL": true,
+    "torch": true,
+    "mmcv": true,
+    "mmdet": true,
+    "mmocr": true,
+    "torch_version": "2.10.0a0+b4e4ee81d3.nv25.12",
+    "cuda_build": "13.1",
+    "cuda_available": true,
+    "gpus": [
+      {
+        "name": "NVIDIA RTX 6000D",
+        "capability": [
+          12,
+          0
+        ],
+        "total_memory_bytes": 89173131264
+      },
+      {
+        "name": "NVIDIA RTX 6000D",
+        "capability": [
+          12,
+          0
+        ],
+        "total_memory_bytes": 89173131264
+      },
+      {
+        "name": "NVIDIA RTX 6000D",
+        "capability": [
+          12,
+          0
+        ],
+        "total_memory_bytes": 89173131264
+      },
+      {
+        "name": "NVIDIA RTX 6000D",
+        "capability": [
+          12,
+          0
+        ],
+        "total_memory_bytes": 89173131264
+      }
+    ],
+    "torch_compiled_arches": [
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90",
+      "sm_100",
+      "sm_120",
+      "compute_120"
+    ],
+    "full_model_and_extensions": "not_tested_by_preflight; run server_gate.py explicitly"
+  },
+  "data": {
+    "raw_train": 1255,
+    "raw_test": 300,
+    "source_train": 1067,
+    "source_dev": 188,
+    "train_suite": {
+      "config": {
+        "name": "initialization-glare-v1",
+        "seed": 42,
+        "kinds": [
+          "glare"
+        ],
+        "severities": [
+          1,
+          2,
+          3
+        ],
+        "include_clean": true,
+        "purpose": "Initial dev and training pipeline diagnostics only; no test calibration."
+      },
+      "config_sha256": "ce4544508e71870f1fd9aab73839b99e11d3ac6af1386fcdb15f35ddce4c106f",
+      "annotation_sha256": "652f8a5dd05d07d4def57562598d45c8a2563435be895d835538255eff44ac30",
+      "images": 1067,
+      "variants": 4,
+      "records": 4268,
+      "label_policy": "Instance labels unchanged; review readability separately."
+    },
+    "dev_suite": {
+      "config": {
+        "name": "initialization-glare-v1",
+        "seed": 42,
+        "kinds": [
+          "glare"
+        ],
+        "severities": [
+          1,
+          2,
+          3
+        ],
+        "include_clean": true,
+        "purpose": "Initial dev and training pipeline diagnostics only; no test calibration."
+      },
+      "config_sha256": "ce4544508e71870f1fd9aab73839b99e11d3ac6af1386fcdb15f35ddce4c106f",
+      "annotation_sha256": "d78770e6607a31e88fbf47ae16b6a550f609c7ca285fb7c9fdcf099782ff67e8",
+      "images": 188,
+      "variants": 4,
+      "records": 752,
+      "label_policy": "Instance labels unchanged; review readability separately."
+    },
+    "training_mixed_annotations": 36052,
+    "scene_near_duplicate_review": "pending",
+    "dev_initialization_exposure": "Official finetuned weights may have seen dev source images"
+  },
+  "checkpoint": {
+    "source_checkpoint": {
+      "path": "/workspace/checkpoints/upstream/lranet_pp/totaltext.pth",
+      "sha256": "520c3285d46fc77cf43bfe8f7f2854254e691e5c28265fd911939f101e8d624e"
+    },
+    "compatibility_policy": {
+      "path": "/workspace/configs/checkpoint_compatibility.json",
+      "sha256": "d97891706f241284863b860fd9519d3036f870956e81ec12ff8178c335cc477e"
+    },
+    "source_audit": {
+      "commit": "ca1c9e3f60df646b66f399b711ee6f83a3254a14",
+      "files_checked": 560,
+      "changed_or_missing": [],
+      "passed": true,
+      "source_variant": "modern",
+      "official_bytes_unchanged": false,
+      "port_manifest": {
+        "path": "/workspace/configs/modern_port.json",
+        "sha256": "8b12220767ad24d8ef08aaf0cb9abc83f4a7583c9468f1986691dde4fa398be3"
+      }
+    },
+    "missing_constant_buffers_initialized": [
+      "bbox_head.tps_decode.P_hat",
+      "bbox_head.tps_decode.P_hat_grid",
+      "bbox_head.tps_decode.P_hat_inv",
+      "bbox_head.tps_decode.inv_delta_C",
+      "recog_head.tps_decode.P_hat",
+      "recog_head.tps_decode.P_hat_grid",
+      "recog_head.tps_decode.P_hat_inv",
+      "recog_head.tps_decode.inv_delta_C"
+    ],
+    "unused_checkpoint_keys_omitted": [
+      "bbox_head.decoder.P_hat",
+      "bbox_head.decoder.P_hat_grid",
+      "bbox_head.decoder.P_hat_inv",
+      "bbox_head.decoder.inv_delta_C",
+      "recog_head.tower.0.bn.bias",
+      "recog_head.tower.0.bn.num_batches_tracked",
+      "recog_head.tower.0.bn.running_mean",
+      "recog_head.tower.0.bn.running_var",
+      "recog_head.tower.0.bn.weight",
+      "recog_head.tower.0.conv.weight",
+      "recog_head.tower.1.bn.bias",
+      "recog_head.tower.1.bn.num_batches_tracked",
+      "recog_head.tower.1.bn.running_mean",
+      "recog_head.tower.1.bn.running_var",
+      "recog_head.tower.1.bn.weight",
+      "recog_head.tower.1.conv.weight",
+      "recog_head.tps_decoder.P_hat",
+      "recog_head.tps_decoder.P_hat_grid",
+      "recog_head.tps_decoder.P_hat_inv",
+      "recog_head.tps_decoder.inv_delta_C",
+      "recog_head.tpsalign2.tps_decoder.P_hat",
+      "recog_head.tpsalign2.tps_decoder.P_hat_grid",
+      "recog_head.tpsalign2.tps_decoder.P_hat_inv",
+      "recog_head.tpsalign2.tps_decoder.inv_delta_C"
+    ],
+    "semantics": "Matches upstream non-strict loading: preserve every matching trained tensor; initialize missing TPS constants from current official code; omit keys unused by current code. No trained tensor is remapped or initialized.",
+    "training_profile": "unverified",
+    "retained_tensor_count": 550,
+    "retained_tensors_modified": 0,
+    "seed": 42,
+    "training_budget": 0,
+    "runtime_checkpoint": {
+      "path": "/workspace/checkpoints/upstream/lranet_pp/totaltext_runtime.pth",
+      "sha256": "6ae3d12572e0aed25c461a90027abe1442499adab8b4aebc4bd33959af033507"
+    }
+  },
+  "cuda_lifecycle": {
+    "checkpoint": {
+      "path": "/workspace/checkpoints/upstream/lranet_pp/totaltext_runtime.pth",
+      "sha256": "6ae3d12572e0aed25c461a90027abe1442499adab8b4aebc4bd33959af033507"
+    },
+    "fpn_initial_max_abs_error": 0.0,
+    "fpn_identity_passed": true,
+    "dcn_forward_backward_passed": true,
+    "grid_sampler_forward_backward_passed": true,
+    "ddp": "pending probe-training",
+    "grid_sampler_native_max_abs_error": 1.1920928955078125e-07,
+    "cuda": "13.1",
+    "gpu": "NVIDIA RTX 6000D",
+    "ocr_metrics": null
+  },
+  "runs": {
+    "E000-rebuilt-image": {
+      "mode": "eval",
+      "module": "none",
+      "stage": "probe",
+      "seed": 42,
+      "gpus": 4,
+      "image_id": "sha256:0d8a927f4d52978f41572f37a13dd6485a0761edd072978705f08f061ef99cde",
+      "started_at": "2026-10-22T14:02:43.585887+00:00",
+      "finished_at": "2026-10-22T14:03:21.729587+00:00",
+      "returncode": 0,
+      "path": "work/runs/E000-rebuilt-image",
+      "checkpoint_sha256": "6ae3d12572e0aed25c461a90027abe1442499adab8b4aebc4bd33959af033507",
+      "annotation_sha256": "eb6cd50b6b6f8d596df4623452e41a357503dab4b083d4ab6d6402ea8b16ddd3",
+      "stage_budget": null,
+      "container_peak_bytes": 13741400064,
+      "metrics": {
+        "e2e-hmean": 0.8480045287291254,
+        "det-hmean": 0.9010682768230376
+      }
+    },
+    "E001-dev-clean-v3": {
+      "mode": "eval",
+      "module": "none",
+      "stage": "probe",
+      "seed": 42,
+      "gpus": 4,
+      "image_id": "unrecorded-direct-container-invocation",
+      "started_at": "2026-10-22T13:35:45.856633+00:00",
+      "finished_at": "2026-10-22T13:36:07.994201+00:00",
+      "returncode": 0,
+      "path": "work/runs/E001-dev-clean-v3",
+      "checkpoint_sha256": "6ae3d12572e0aed25c461a90027abe1442499adab8b4aebc4bd33959af033507",
+      "annotation_sha256": "9cad20cf1d3d02a2a0aeec3450f06374296bf824f9e22cc5a80883acbd45b72a",
+      "stage_budget": null,
+      "container_peak_bytes": 9286664192,
+      "metrics": {
+        "e2e-hmean": 0.8519405845711548,
+        "det-hmean": 0.8607389362565976
+      }
+    },
+    "E001-dev-glare-s1-v1": {
+      "mode": "eval",
+      "module": "none",
+      "stage": "probe",
+      "seed": 42,
+      "gpus": 4,
+      "image_id": "unrecorded-direct-container-invocation",
+      "started_at": "2026-10-22T13:41:53.048554+00:00",
+      "finished_at": "2026-10-22T13:42:15.186297+00:00",
+      "returncode": 0,
+      "path": "work/runs/E001-dev-glare-s1-v1",
+      "checkpoint_sha256": "6ae3d12572e0aed25c461a90027abe1442499adab8b4aebc4bd33959af033507",
+      "annotation_sha256": "9cad20cf1d3d02a2a0aeec3450f06374296bf824f9e22cc5a80883acbd45b72a",
+      "stage_budget": null,
+      "container_peak_bytes": 14019756032,
+      "metrics": {
+        "e2e-hmean": 0.84688995215311,
+        "det-hmean": 0.8593433319821646
+      }
+    },
+    "E001-dev-glare-s2-v1": {
+      "mode": "eval",
+      "module": "none",
+      "stage": "probe",
+      "seed": 42,
+      "gpus": 4,
+      "image_id": "unrecorded-direct-container-invocation",
+      "started_at": "2026-10-22T13:41:53.018517+00:00",
+      "finished_at": "2026-10-22T13:42:15.157155+00:00",
+      "returncode": 0,
+      "path": "work/runs/E001-dev-glare-s2-v1",
+      "checkpoint_sha256": "6ae3d12572e0aed25c461a90027abe1442499adab8b4aebc4bd33959af033507",
+      "annotation_sha256": "9cad20cf1d3d02a2a0aeec3450f06374296bf824f9e22cc5a80883acbd45b72a",
+      "stage_budget": null,
+      "container_peak_bytes": 13997780992,
+      "metrics": {
+        "e2e-hmean": 0.781925343811395,
+        "det-hmean": 0.8188254893794252
+      }
+    },
+    "E001-dev-glare-s3-v1": {
+      "mode": "eval",
+      "module": "none",
+      "stage": "probe",
+      "seed": 42,
+      "gpus": 4,
+      "image_id": "unrecorded-direct-container-invocation",
+      "started_at": "2026-10-22T13:40:22.511078+00:00",
+      "finished_at": "2026-10-22T13:40:44.649449+00:00",
+      "returncode": 0,
+      "path": "work/runs/E001-dev-glare-s3-v1",
+      "checkpoint_sha256": "6ae3d12572e0aed25c461a90027abe1442499adab8b4aebc4bd33959af033507",
+      "annotation_sha256": "9cad20cf1d3d02a2a0aeec3450f06374296bf824f9e22cc5a80883acbd45b72a",
+      "stage_budget": null,
+      "container_peak_bytes": 14771605504,
+      "metrics": {
+        "e2e-hmean": 0.593016599885518,
+        "det-hmean": 0.6253630203291385
+      }
+    },
+    "G03-baseline-single-probe-v3": {
+      "mode": "train",
+      "module": "none",
+      "stage": "probe",
+      "seed": 42,
+      "gpus": 1,
+      "image_id": "unrecorded-direct-container-invocation",
+      "started_at": "2026-10-22T13:37:05.650298+00:00",
+      "finished_at": "2026-10-22T13:37:33.794080+00:00",
+      "returncode": 0,
+      "path": "work/runs/G03-baseline-single-probe-v3",
+      "checkpoint_sha256": "6ae3d12572e0aed25c461a90027abe1442499adab8b4aebc4bd33959af033507",
+      "annotation_sha256": "652f8a5dd05d07d4def57562598d45c8a2563435be895d835538255eff44ac30",
+      "stage_budget": {
+        "max_iters": 30,
+        "lr_steps": [
+          15
+        ],
+        "checkpoint_interval": 30,
+        "log_interval": 1
+      },
+      "container_peak_bytes": 10947440640
+    },
+    "G03-adapter-ddp2-probe-v2": {
+      "mode": "train",
+      "module": "saturation",
+      "stage": "probe",
+      "seed": 42,
+      "gpus": 2,
+      "image_id": "unrecorded-direct-container-invocation",
+      "started_at": "2026-10-22T13:40:22.909358+00:00",
+      "finished_at": "2026-10-22T13:41:11.342330+00:00",
+      "returncode": 0,
+      "path": "work/runs/G03-adapter-ddp2-probe-v2",
+      "checkpoint_sha256": "6ae3d12572e0aed25c461a90027abe1442499adab8b4aebc4bd33959af033507",
+      "annotation_sha256": "652f8a5dd05d07d4def57562598d45c8a2563435be895d835538255eff44ac30",
+      "stage_budget": {
+        "max_iters": 30,
+        "lr_steps": [
+          15
+        ],
+        "checkpoint_interval": 15,
+        "log_interval": 1
+      },
+      "container_peak_bytes": 20752965632,
+      "adapter_health": {
+        "iteration": 30,
+        "finite_gradients": true,
+        "nonzero_gradient_tensors": 24,
+        "max_parameter_change": 0.00027021666755899787,
+        "passed": true
+      }
+    },
+    "G03-adapter-resume-probe-v2": {
+      "mode": "train",
+      "module": "saturation",
+      "stage": "probe",
+      "seed": 42,
+      "gpus": 1,
+      "image_id": "unrecorded-direct-container-invocation",
+      "started_at": "2026-10-22T13:44:28.809213+00:00",
+      "finished_at": "2026-10-22T13:44:50.950946+00:00",
+      "returncode": 0,
+      "path": "work/runs/G03-adapter-resume-probe-v2",
+      "checkpoint_sha256": "0b40ad729ed37b70564a4f77827d0d7b040d6e0fde978585c21593add907eea9",
+      "annotation_sha256": "652f8a5dd05d07d4def57562598d45c8a2563435be895d835538255eff44ac30",
+      "stage_budget": {
+        "max_iters": 30,
+        "lr_steps": [
+          15
+        ],
+        "checkpoint_interval": 15,
+        "log_interval": 1
+      },
+      "container_peak_bytes": 15142440960,
+      "adapter_health": {
+        "iteration": 30,
+        "finite_gradients": true,
+        "nonzero_gradient_tensors": 24,
+        "max_parameter_change": 4.328181967139244e-05,
+        "passed": true
+      }
+    },
+    "G05-mixed-baseline-image": {
+      "mode": "train",
+      "module": "none",
+      "stage": "probe",
+      "seed": 42,
+      "gpus": 2,
+      "image_id": "sha256:0d8a927f4d52978f41572f37a13dd6485a0761edd072978705f08f061ef99cde",
+      "started_at": "2026-10-22T14:02:49.732782+00:00",
+      "finished_at": "2026-10-22T14:03:39.892322+00:00",
+      "returncode": 0,
+      "path": "work/runs/G05-mixed-baseline-image",
+      "checkpoint_sha256": "6ae3d12572e0aed25c461a90027abe1442499adab8b4aebc4bd33959af033507",
+      "annotation_sha256": "ed95d17991a43c1dfba368213c116f00eeeada13b8a5f0a227b8879e13f5ab1d",
+      "stage_budget": {
+        "max_iters": 30,
+        "lr_steps": [
+          15
+        ],
+        "checkpoint_interval": 15,
+        "log_interval": 1
+      },
+      "container_peak_bytes": 14105436160
+    },
+    "G05-mixed-adapter-image": {
+      "mode": "train",
+      "module": "saturation",
+      "stage": "probe",
+      "seed": 42,
+      "gpus": 2,
+      "image_id": "sha256:0d8a927f4d52978f41572f37a13dd6485a0761edd072978705f08f061ef99cde",
+      "started_at": "2026-10-22T14:04:31.356930+00:00",
+      "finished_at": "2026-10-22T14:05:21.517364+00:00",
+      "returncode": 0,
+      "path": "work/runs/G05-mixed-adapter-image",
+      "checkpoint_sha256": "6ae3d12572e0aed25c461a90027abe1442499adab8b4aebc4bd33959af033507",
+      "annotation_sha256": "ed95d17991a43c1dfba368213c116f00eeeada13b8a5f0a227b8879e13f5ab1d",
+      "stage_budget": {
+        "max_iters": 30,
+        "lr_steps": [
+          15
+        ],
+        "checkpoint_interval": 15,
+        "log_interval": 1
+      },
+      "container_peak_bytes": 16220663808,
+      "adapter_health": {
+        "iteration": 30,
+        "finite_gradients": true,
+        "nonzero_gradient_tensors": 24,
+        "max_parameter_change": 0.00029886895208619535,
+        "passed": true
+      }
+    },
+    "G03-reload-adapter-image": {
+      "mode": "eval",
+      "module": "saturation",
+      "stage": "probe",
+      "seed": 42,
+      "gpus": 4,
+      "image_id": "sha256:0d8a927f4d52978f41572f37a13dd6485a0761edd072978705f08f061ef99cde",
+      "started_at": "2026-10-22T14:06:13.660740+00:00",
+      "finished_at": "2026-10-22T14:06:35.802223+00:00",
+      "returncode": 0,
+      "path": "work/runs/G03-reload-adapter-image",
+      "checkpoint_sha256": "d2ce4c7990c3bea3b58cf79ea734f5776b9c830a056e4290daa585efda2e3dc3",
+      "annotation_sha256": "9cad20cf1d3d02a2a0aeec3450f06374296bf824f9e22cc5a80883acbd45b72a",
+      "stage_budget": null,
+      "container_peak_bytes": 6218096640,
+      "metrics": {
+        "e2e-hmean": 0.8509021842355176,
+        "det-hmean": 0.8651911468812878
+      }
+    }
+  },
+  "official_clean_metrics": {
+    "e2e-hmean": 0.8480045287291254,
+    "det-hmean": 0.9010682768230376
+  },
+  "paper_reproduction": "not_passed: checkpoint training profile unverified",
+  "method_effectiveness": "not_tested: 30-step health probes only",
+  "four_gpu_ddp": "pending: GPU2 occupied by another project",
+  "resource_fault_drills": "partial: real bad-data storm terminated; remaining full drills pending",
+  "artifact_sha256": {
+    "docker/Dockerfile.modern": "89a1c7df59ed0a29cae341a8019a90e0d866d5358b071c65c811c224a777b18d",
+    "docker/requirements.modern.txt": "d5240104c45e2f066507cee6ed304eae1b467c1b1b782de16903cc07d93eb10a",
+    "compose.yaml": "cc9eb985e59fdb6a3a489c09097dd63708dde833b04c58dc397be6cbce719ab6",
+    "configs/modern_port.json": "c131686fbb70f22d1ddbdb9619717188d7fed16ac2a01170566fb673cfc3be5d",
+    "configs/asset_sources.json": "f7744ad404b4c331ca74377f4fd6f0a65c30f76c299a4306a69d37f10203ed9b",
+    "configs/checkpoint_compatibility.json": "d97891706f241284863b860fd9519d3036f870956e81ec12ff8178c335cc477e",
+    "configs/diagnostic.json": "ce4544508e71870f1fd9aab73839b99e11d3ac6af1386fcdb15f35ddce4c106f",
+    "work/setup/runtime-image-pip-freeze.txt": "662918aeb68c8572353746df117f4eac82dab596afde98ca50dd70a9ac83f5af",
+    "data/raw/totaltext/manifest.json": "f74f26be7a96c116c7e927bfee025ae0f65406cf84afb9c28fd08424a9985189",
+    "data/derived/totaltext_train/totaltext_mixed.json": "ed95d17991a43c1dfba368213c116f00eeeada13b8a5f0a227b8879e13f5ab1d"
+  },
+  "remaining": [
+    "Identify author checkpoint training profile",
+    "Scene/near-duplicate and human readability review",
+    "Four-GPU synchronous probe when all GPUs available",
+    "Complete fault injection drills",
+    "Only then consider preregistered 500-step matched pilots and later full experiments"
+  ]
+}

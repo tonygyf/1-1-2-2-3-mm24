@@ -1,6 +1,6 @@
 # ExtremeOCR：最小研究项目简报
 
-> 2026-10-19续轮更新：本文件保留立项背景；最新实现和协议以 `docs/STATUS.md`、`docs/BASELINE_ALIGNMENT.md`、`docs/EXPERIMENTS.md` 为准。E003容量对照现已实现；独立dev/资源限制等已补。仍没有真实OCR分数或服务器复现。
+> 2026-10-22 更新：本文件保留立项时的历史背景与判断，正文中的“未运行/未下载”是前轮状态。当前已在 Docker 下载正式资源并完成真实推理和短程诊断，最新事实、训练边界及未验证项以 `docs/STATUS.md`、`outputs/INITIALIZATION_REPORT.md` 为准；尚未证明方法有效或论文创新。
 
 2026-10-19；目标为 CCF-B；算力为用户提供的 4 × RTX 6000D、约 83GB/卡。
 

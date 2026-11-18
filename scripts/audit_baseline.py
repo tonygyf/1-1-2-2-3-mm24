@@ -19,18 +19,34 @@ from extremeocr.data import sha256
 from extremeocr.provenance import write_json
 
 
-def audit(root=ROOT):
+def audit(root=ROOT, vendor=None, variant=None):
     contract = json.loads((root / "configs/baseline_source.json").read_text(encoding="utf-8"))
     locked = json.loads((root / "configs/upstream.lock.json").read_text(encoding="utf-8"))["lranet_pp"]
     if any(contract[key] != locked[key] for key in ("repo", "commit", "archive_sha256")):
         raise ValueError("Baseline source manifest and version lock disagree")
-    vendor = Path(os.environ.get("EXTREMEOCR_VENDOR", str(root / locked["path"])))
-    changed = [name for name, expected in contract["files"].items()
+    vendor = Path(vendor or os.environ.get("EXTREMEOCR_VENDOR", str(root / locked["path"])))
+    expected_files = dict(contract["files"])
+    variant = variant or os.environ.get("EXTREMEOCR_SOURCE_VARIANT", "official")
+    port_asset = None
+    if variant != "official":
+        if variant != "modern":
+            raise ValueError("Unknown baseline source variant: " + variant)
+        port_path = root / "configs/modern_port.json"
+        port = json.loads(port_path.read_text(encoding="utf-8"))
+        if port["lranet_upstream_commit"] != locked["commit"]:
+            raise ValueError("Modern port belongs to a different upstream commit")
+        if not set(port["lranet_patched_files"]) <= set(expected_files):
+            raise ValueError("Port manifest contains unknown upstream files")
+        expected_files.update(port["lranet_patched_files"])
+        port_asset = {"path": str(port_path), "sha256": sha256(port_path)}
+    changed = [name for name, expected in expected_files.items()
                if not (vendor / name).is_file() or sha256(vendor / name) != expected]
     # The official evaluator writes this result JSON; keep the source tree pristine
     # by restoring it only manually, never hiding changes to tracked source.
     return {"commit": contract["commit"], "files_checked": len(contract["files"]),
-            "changed_or_missing": changed, "passed": not changed}
+            "changed_or_missing": changed, "passed": not changed,
+            "source_variant": variant, "official_bytes_unchanged": variant == "official",
+            "port_manifest": port_asset}
 
 
 def main():

@@ -36,3 +36,7 @@ checkpoints/*
 *.gz
 *.log
 /autoresearch/
+
+!outputs/INITIALIZATION_REPORT.md
+!outputs/initialization_status.json
+!outputs/baseline_diagnostic_scores.csv

@@ -15,7 +15,7 @@ def main():
     dest = ROOT / "work/upstream/LRANet-PP"
     if (dest / ".source.json").exists():
         from audit_baseline import audit
-        report = audit()
+        report = audit(vendor=dest, variant="official")
         if not report["passed"]:
             raise SystemExit("Existing snapshot changed; inspect before continuing: " + repr(report))
         print("Verified existing official snapshot: " + str(dest))

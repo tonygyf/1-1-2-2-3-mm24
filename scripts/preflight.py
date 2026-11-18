@@ -5,12 +5,20 @@ try:
 except ImportError:
     import importlib_metadata as metadata
 import json
+import os
+from pathlib import Path
 import platform
 import sys
 
-report = {"python": sys.version, "platform": platform.platform()}
+report = {"python": sys.version, "platform": platform.platform(),
+          "inside_docker": Path("/.dockerenv").exists(),
+          "source_variant": os.environ.get("EXTREMEOCR_SOURCE_VARIANT", "official"),
+          "vendor": os.environ.get("EXTREMEOCR_VENDOR"),
+          "cgroup": {name: (Path("/sys/fs/cgroup") / name).read_text().strip()
+                     for name in ("memory.max", "memory.swap.max", "cpu.max", "pids.max")
+                     if (Path("/sys/fs/cgroup") / name).exists()}}
 report["distribution_versions"] = {}
-for distribution in ("torch", "torchvision", "mmcv-full", "mmdet", "mmocr", "numpy", "rapidfuzz", "Levenshtein"):
+for distribution in ("torch", "torchvision", "mmcv-full", "mmdet", "mmocr", "numpy", "rapidfuzz", "Levenshtein", "opencv-contrib-python-headless", "albumentations", "fvcore", "lanms-nova"):
     try:
         report["distribution_versions"][distribution] = metadata.version(distribution)
     except metadata.PackageNotFoundError:

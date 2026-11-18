@@ -1,0 +1,33 @@
+--- a/mmcv/ops/csrc/pytorch/cuda/ms_deform_attn_cuda.cu
++++ b/mmcv/ops/csrc/pytorch/cuda/ms_deform_attn_cuda.cu
+@@ -14,7 +14,7 @@
+ #include <cuda.h>
+ #include <cuda_runtime.h>
+ 
+-#include <THC/THCAtomics.cuh>
++#include <ATen/cuda/Atomic.cuh>
+ #include <vector>
+ 
+ #include "ms_deform_attn_cuda_kernel.cuh"
+--- a/mmcv/ops/csrc/pytorch/spconv_utils.h
++++ b/mmcv/ops/csrc/pytorch/spconv_utils.h
+@@ -35,7 +35,7 @@
+ 
+ template <typename scalar_t>
+ void check_torch_dtype(const torch::Tensor &tensor) {
+-  switch (tensor.type().scalarType()) {
++  switch (tensor.scalar_type()) {
+     case at::ScalarType::Double: {
+       auto val = std::is_same<std::remove_const_t<scalar_t>, double>::value;
+       TV_ASSERT_RT_ERR(val, "error");
+--- a/mmcv/parallel/_functions.py
++++ b/mmcv/parallel/_functions.py
+@@ -72,7 +72,7 @@
+         streams = None
+         if input_device == -1 and target_gpus != [-1]:
+             # Perform CPU to GPU copies in a background stream
+-            streams = [_get_stream(device) for device in target_gpus]
++            streams = [_get_stream(torch.device("cuda", device)) for device in target_gpus]
+ 
+         outputs = scatter(input, target_gpus, streams)
+         # Synchronize with the copy stream

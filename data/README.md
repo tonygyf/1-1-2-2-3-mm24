@@ -1,25 +1,19 @@
-# 数据放置
+# 数据
 
-实际图像与标注尚未下载。只在这里记录资源位置，不创建空数据集伪装成可用数据。
-
-后续按需创建：
+2026-10-22 已在 Docker 中下载 LRANet++ 作者整理的 Total-Text，完成 ZIP CRC、图像解码、尺寸、1255/300 数量及 SHA256 校验。资源入口与固定哈希为 `configs/asset_sources.json`；本地来源说明/逐图哈希为 `data/raw/totaltext/SOURCE.md`、`manifest.json`，下载收据伴随各标注和 archive。
 
 ```text
-data/
-  raw/totaltext/totaltext_train.json
-  raw/totaltext/totaltext_test.json
-  raw/totaltext/training/...
-  raw/totaltext/test/...
-  raw/real_highlight/...            # 真实测试图，单独分组
-  derived/totaltext_test/...        # CLI 自动生成，不手动编辑
-  derived/totaltext_train/...
+data/raw/totaltext/totaltext_train.json
+data/raw/totaltext/totaltext_test.json
+data/raw/totaltext/training/...  # train JSON file_name 不含 training/
+data/raw/totaltext/test/...      # test JSON file_name 含 test/
+data/derived/totaltext_split/    # seed42: train1067/dev188
+data/derived/totaltext_train/    # clean + glare/s1,s2,s3；PNG 1:1:1:1
+data/derived/totaltext_dev/      # 188×4，固定阈值诊断；不生成测试腐蚀集
 ```
 
-1. 第一阶段使用 LRANet++ 作者整理的 Total-Text 图像与 JSON，保持原始 `images` 顺序、file_name 路径及 train/test 划分。[官方获取说明](https://github.com/ychensu/LRANet-PP#dataset)。作者的测试 `img_prefix` 是 totaltext 根目录，file_name 可能包含 `test/`，以 JSON 内容为准。
-2. [Total-Text 官方项目](https://github.com/cs-chan/Total-Text-Dataset)用于核对原始数据/协议。其他格式的 COCO 标注不一定兼容作者评测顺序。
-3. ICDAR2015 作为第二验证集候选；当前运行器专门接 Total-Text，不把不兼容的 IC15 评测说成已实现。
-4. 真实强光图计划先 50 张试采集，最终 200–500 张。保留原始拍摄记录/许可、设备、场景组、光照标签和转录。按地点/视频/标牌分组划分；同一对象不同曝光不得跨训练和测试。
-5. 饱和后人工也无法辨认的文字另标 `unreadable`。主测试保留可读文字，完整压力测试单列。不要把完全被覆盖的文字直接当可读 GT 评价。
-6. [Robust-Text](https://proceedings.mlr.press/v189/cao23a.html)包含真实复杂环境，但以行级检测为主，不直接当作已有 spotting 转录数据。先核对能否下载及标注。
+在容器内运行 `python scripts/download_assets.py --only data`。校验收据匹配时复用；已完成 split/suite 不自动覆盖。场景/近重复分组尚需人工复查；官方微调权重可能见过 dev 源图，不能把它当作训练来源从未见过的独立泛化集。
 
-数据下载后在 `data/raw/<name>/SOURCE.md` 记录：来源链接、下载时间、许可、版本、数量、标注哈希、划分及已知重叠。服务器可将 data 指向已有共享盘，不复制多份。
+来源：[LRANet++ 官方说明](https://github.com/ychensu/LRANet-PP#dataset)、[原 Total-Text](https://github.com/cs-chan/Total-Text-Dataset)。保留作者标注和图像顺序。原始数据/分发条款适用，未声称新的分发授权；实际数据不进 Git。
+
+真实强光采集、可读性审核、场景分组、第二数据集仍待完成。饱和后人也无法辨认的实例需另记 unreadable；合成 glare 掉点不直接构成真实场景结论。

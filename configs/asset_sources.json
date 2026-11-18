@@ -1,0 +1,25 @@
+{
+  "totaltext_images": {
+    "url": "https://drive.google.com/file/d/1R6EXhWHbJnRnSbIMfS-DJ6syKtx0ppr6/view",
+    "drive_id": "1R6EXhWHbJnRnSbIMfS-DJ6syKtx0ppr6",
+    "archive": "work/downloads/totaltext.zip",
+    "sha256": "30e7fb17b6699a62a6002d86579548cee2660c88047a983f47b5ee181efd7984"
+  },
+  "totaltext_train": {
+    "drive_id": "1lYzKz3-cyZebQDas8oty1z7DDFDUkUvS",
+    "path": "data/raw/totaltext/totaltext_train.json",
+    "sha256": "da94cb67799b800cecb86096da826faafb0fc1c480edae0a1146818204c211b3"
+  },
+  "totaltext_test": {
+    "drive_id": "1jBs-qA9D6P8qvEoJureNObqCwE6PgKlM",
+    "path": "data/raw/totaltext/totaltext_test.json",
+    "sha256": "eb6cd50b6b6f8d596df4623452e41a357503dab4b083d4ab6d6402ea8b16ddd3"
+  },
+  "totaltext_checkpoint": {
+    "url": "https://1drv.ms/u/c/5aa69fbe58464061/IQAz-BfPQKuZTKjs8tPpor5AATNt4ogaHSeYUOgi-r1VqCs?e=23EdwX&download=1",
+    "path": "checkpoints/upstream/lranet_pp/totaltext.pth",
+    "upstream_filename": "totaltext_final.pth",
+    "training_profile": "unverified",
+    "sha256": "520c3285d46fc77cf43bfe8f7f2854254e691e5c28265fd911939f101e8d624e"
+  }
+}
